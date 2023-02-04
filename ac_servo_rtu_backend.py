@@ -122,6 +122,8 @@ if __name__ == "__main__":
                                 baudrate=9600, 
                                 strict=False)
     
+    # TODO: Before communicating with the servo set by hand the Pn065 to 1 for motor1, 2 for motor2, etc.
+    
     servo = AASD_15A(client, 1) # address = 1 for motor 1, 2 for motor 2, etc.
     
     # let's see what is the current initialization mode:
