@@ -108,7 +108,7 @@ class AASD_15A(object):
         Returns:
             int: TODO
         """        
-        rq = self.controller.write_register(0, int(value), unit=self.UNIT)
+        rq = self.controller.write_register(1, int(value), unit=self.UNIT)
         return self.get_motor_code() == value
     
     #TODO: for other functions that we don't need return value, we can ignore the return function to spped up the communication.
