@@ -51,7 +51,9 @@ class AASD_15A(object):
             from pymodbus.client.sync import ModbusSerialClient as ModbusClient
             client = ModbusClient(method='rtu', 
                                 port='COM2', 
-                                timeout=1, 
+                                stopbits=1, 
+                                bytesize=8,
+                                parity='O',
                                 baudrate=9600, #TODO
                                 strict=False)
             servo = AASD_15A(client, 1)
@@ -117,10 +119,12 @@ class AASD_15A(object):
 if __name__ == "__main__":
     # initialize de COM port and hook it to the driver
     client = ModbusClient(method='rtu', 
-                                port='COM2', 
-                                timeout=1, 
-                                baudrate=9600, 
-                                strict=False)
+                          port='COM8', 
+                          stopbits=1,
+                          bytesize=8,
+                          parity='O',
+                          baudrate=115200, 
+                          strict=False)
     
     # TODO: Before communicating with the servo set by hand the Pn065 to 1 for motor1, 2 for motor2, etc.
     
