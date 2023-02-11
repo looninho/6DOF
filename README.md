@@ -24,7 +24,7 @@ WIP: implement functions for:
 
 ## installation (TODO)
 
-## Quck start (TODO)
+## Quick start (TODO)
 
 ## Basic test with `pymodbus`
 
