@@ -14,7 +14,7 @@ WIP: implement functions for:
   - torque control parameters: Pn186~Pn215 (TODO)
   - extended control parameter: Pn216~Pn236 (TODO)
 - Monitoring mode: Dn000~Dn028 (TODO)
-- Alarm reading mode: Fn000~Fn009 (TODO)
+- Alarm reading mode: Fn000~Fn??? (TODO)
 
 ## modbus communication address
 
