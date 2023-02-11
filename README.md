@@ -75,6 +75,6 @@ client.write_register(Pn, value, unit=motor_id) # motor code for 80st-m02430 is 
 6) **WARNING** for test only: enable the driver when power on:
 ```sh
 Pn, value = 3, 1
-client.write_register(Pn, value, unit=motor_id) # motor code for 80st-m02430 is 4
+client.write_register(Pn, value, unit=motor_id)
 ```
 7)
