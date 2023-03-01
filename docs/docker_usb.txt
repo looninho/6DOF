@@ -1,10 +1,20 @@
-docker run --ip 172.21.5.10 -it --rm --privileged -e DISPLAY=host.docker.internal:0.0 -e LIBGL_ALWAYS_INDIRECT=1 -e XCURSOR_SIZE=16 -v "e:\dev\instrumentation\hardware\6DOF":/6dof:rw --name=pymodbus_usb ghcr.io/pymodbus-dev/pymodbus:dev bash
+docker run --ip 172.24.245.10 -it --rm --privileged -e XDG_RUNTIME_DIR=/tmp/runtime-root -e RUNLEVEL=3 -e DISPLAY=host.docker.internal:0.0 -e LIBGL_ALWAYS_INDIRECT=1 -e XCURSOR_SIZE=16 -v "e:\dev\instrumentation\hardware\6DOF":/6dof:rw --name=pymodbus_usb ghcr.io/pymodbus-dev/pymodbus:dev bash
+
+docker build -f Dockerfile -t looninho/pymodbus-dev/pymodbus:dev .
+docker run --ip 172.24.245.10 -it --rm --privileged -e DISPLAY=host.docker.internal:0.0 -v "e:\dev\instrumentation\hardware\6DOF":/6dof:rw --name=pymodbus_usb looninho/pymodbus-dev/pymodbus:dev bash
+
+# docker run --ip 172.21.5.10 -it --rm --privileged -e XDG_RUNTIME_DIR=/tmp/runtime-root -e RUNLEVEL=3 -v "e:\dev\instrumentation\hardware\6DOF":/6dof:rw --name=pymodbus_usb ghcr.io/pymodbus-dev/pymodbus:dev bash
 
 apt update
-apt upgrade
-apt install libgl1 libglib2.0-0
+# apt upgrade
 
-apt install '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
+apt search dbus-glib
+
+apt install '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev libglib2.0-0 libfontconfig1  libdbus-glib-1-2
+# apt install libegl1 libxkbcommon0 libgl1 libglib2.0-0 libfontconfig1 libdbus-glib-1-2
+
+pip install PySide6
+
 ##################################
 # 20230228
 ##################################
@@ -56,7 +66,7 @@ for i in range(count):
 # 
 ##################################
 
-# Windows termnal:
+# Windows terminal:
 usbipd list
 wsl --list --all --verbose
 ipconfig
