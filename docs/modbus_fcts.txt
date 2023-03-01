@@ -1,0 +1,197 @@
+# System parameters
+Pn000 Open parameters initialization function 0~2 1 All
+Pn001▲ motor code 3-12 3 All
+Pn002▲ control mode 0~5 2 All
+Pn003 Servo enabled 0~1 0 All
+Pn004 Servo broken that can stop 0~2 0 All
+Pn005 Can make deceleration time 5-10000 100 ms All
+Pn006 With/without positive driving is prohibited 0-3 0 All
+Pn007 Is/ reverse the driver stop deceleration time is prohibited 0-10000 60 ms All
+Pn008 Internal around are torque limit (CCW) 0-300 300 % All
+Pn009 Around inside the torque limit (the CW) -300~0 -300 % All
+Pn010 External around are torque limit (CCW) 0-300 300 % All
+Pn011 Around outside the torque limit (the CW) -300~0 -300 % All
+Pn012 Forward (CCW) torque overload alarm level 1 0-300 200 % All
+Pn013 Inversion (the CW) torque overload alarm level 1 -300-0 -200 % All
+Pn014 Torque overload alarm detection 1 time 0-800 80 100ms All
+Pn015 Overload 2 testing time 0-150 40 100ms All
+Pn016▲ DA The molecular DA of encoder divider output 1~63 1 All
+Pn017▲ DB The denominator DB of encoder divider output 1~63 1 All
+Pn018▲ Take the encoder output pulse AB phase logic 0-1 0 All
+Pn019▲ Rated current Settings 0-50 0 A All
+Pn020▲ Rated speed setting 0~5000 0 r/min All
+Pn021 reach the predetermined speed 0~5000 500 r/min All
+Pn022 Hysteresis comparison difference in speed 0~5000 30 r/min All
+Pn023 Reach the predetermined speed detection direction 0-2 0 All
+Pn024 Reach the predetermined torque 0-300 100 % All
+Pn025 Reach the predetermined torque hysteresis comparison difference 0-300 5 % All
+Pn026 Reach the predetermined torque direction 0-2 0 All
+Pn027 Zero speed detection range setting 0~1000 10 r/min All
+Pn028 Zero speed test back to the poor 0~1000 5 r/min All
+Pn029 Motor electromagnetic brake testing point zero speed 0~1000 5 r/min All
+Pn030 The motor stops electromagnetic brake delay time 0~2000 0 Ms All
+Pn031 The motor electromagnetic brake waiting time during operation 0~2000 500 ms All
+Pn032 The motor speed of electromagnetic brake action during operation 0-3000 30 r/min All
+Pn033 The origin is triggered 0~3 0 All
+Pn034 The origin return reference point model 0~5 0 All
+Pn035 The origin back to the origin model 0~2 0 All
+Pn036 The origin position offset high -9999~9999 0 Pulse All
+Pn037 The origin position offset low -9999~9999 0 Pulse All
+Pn038 The origin back to the first speed 1~3000 200 R/min All
+Pn039 The origin back to the second speed 1~3000 50 R/min All
+Pn040 The accelerating time of origin 5~10000 50 ms All
+Pn041 The origin return to slow down time 5~10000 50 ms All
+Pn042 The origin in the delay 0~3000 60 ms All
+Pn043 Complete signal delay of origin 5~3000 80 ms All
+Pn044 The origin of origin instruction execution mode 0~1 0 All
+Pn045 Gain switch to choose 0~5 5 All
+Pn046 Gain switch level 0~30000 80 All
+Pn047 Gain switch back to the poor 0~30000 6 All
+Pn048 Gain switch delay time 0~20000 20 0.1ms All
+Pn049◆ Gain switch time 1 0~15000 0 0.1ms All
+Pn050◆ Gain switch time 2 0~15000 50 0.1ms All
+Pn051 The motor running top speed limit 0~5000 3000 All
+Pn052▲ SigIn1 port functional allocation -27~27 1 All
+Pn053▲ SigIn 2 port functional allocation -27~27 2 All
+Pn054▲ SigIn 3 port functional allocation -27~27 19 All
+Pn055▲ SigIn 4 port functional allocation -27~27 8 All
+Pn056 SigIn 1 port filtering time 1~1000 2 ms All
+Pn057 SigIn 2 port filtering time 1~1000 2 ms All
+Pn058 SigIn 3 port filtering time 1~1000 2 ms All
+Pn059 SigIn 4 port filtering time 1~1000 2 ms All
+Pn060▲ SigOut 1 port functional allocation -14~14 2 All
+Pn061▲ SigOut 2 port functional allocation -14~14 1 All
+Pn062▲ SigOut 3 port functional allocation -14~14 4 All
+Pn063▲ SigOut 4 port functional allocation -14~14 7 All
+Pn064▲ Communication mode 0-2 0 All
+Pn065 Communications site 1-254 1 All
+Pn066▲ Communication baud rate 0-3 1 All
+Pn067▲ Communication mode setting 0-8 8 All
+Pn068 Input function control mode select register 1 0~32767 0 All
+Pn069 Input function control mode select register 2 0~4095 0 All
+Pn070 Input function logic state set register 1 0~32767 32691 All
+Pn071 Input function logic state set register 2 0~4095 4095 All
+Pn072 Internal use
+Pn073 Internal use
+Pn074 Fan function temperature 30~70 50 ℃ All
+Pn075 Fan operation mode 0~2 0 All
+Pn076 Emergency stop reset (EMG) 0-1 0 All
+Pn077 Positive and negative driving ban checked out 0-2 0 All
+Pn078 Lack of voltage detection 0~1 1 All
+Pn079 The system status display project selection 0-23 0 All
+Pn080▲ The encoder to choose 0~0 0 All
+Pn081 User preferences permanent write operation 0-1 0 All
+Pn082 SigOut port force output 0 0~255 All
+Pn083 Low pressure alarm detect amplitude 50~280 200 V All
+Pn084 High pressure alarm detect amplitude 290~380V 365 V All
+Pn085▲ Motor pole logarithmic 1~100 4 对 All
+Pn086 Renewable circuit discharge cycle 0~2000 70 ms All
+Pn087▲ Selection of braking resistance 0~2 1 - All
+Pn088 Renewable circuit discharge cycle 0~2000 70 ms All
+Pn089▲ External braking resistance power 20~20000 100 W All
+Pn090▲ External braking resistance value 10~1000 100 ® All
+Pn091 External braking resistanc, regeneration, available capacity 5-100 20 % All
+Pn093-pn095 Internal use - - - -
+# Position control parameters
+Pn096▲ The command pulse input mode 0-2 0 P
+Pn097▲ Instruction selection logic pulse input direction 0-1 0 P
+Pn098 Pulse electronics gear than the molecules of 1 1~32767 1 P
+Pn099 Pulse electronics gear than the molecules of 2 1~32767 1 P
+Pn100 Pulse electronics gear than the molecules of 3 1~32767 1 P
+Pn101 Pulse electronics gear than the molecules of 4 1~32767 1 P
+Pn102▲ Pulse electronics gear than the denominator 1~32767 1 P
+Pn103 Beyond the scope of setting position deviation 1~ 500 500 Thousand pulse P
+Pn104 Complete range set position location 0~ 32767 10 pulse P
+Pn105 Positioning to complete set 0~ 32767 3 pulse P
+Pn106 Position location close to the range of Settings 0~ 32767 300 pulse P
+Pn107 Position location close to the poor set back 0~ 32767 30 pulse P
+Pn108 Position deviation clear way 0-1 1 P
+Pn109◆ Position command deceleration mode 0-2 1 P
+Pn110◆ Position command a filtering time constant 5~1750 50 ms P
+Pn111◆ S-shaped filtering time constant Ta position instruction 5~1200 50 ms P
+Pn112◆ position instruction Ts S-shaped filtering time constant Ts 5~550 20 ms P
+Pn113▲ The position loop feedforward gain 0-100 0 % P
+Pn114▲ Position loop feedforward filter time constant 1-50 5 ms P
+Pn115 The position controller gain 1 5-2000 100 % P
+Pn116 The position controller gain 2 5-2000 100 % P
+Pn117 Position command source selection 0~1 0 P
+Pn118 Internal position instruction suspend mode selection 0~1 0 P
+Pn119 Internal position suspended deceleration time 0~10000 50 P
+Pn120 Internal position 0 high pulse Number set up -9999~99 99 0 ten thousand pulse P
+Pn121 Internal position instruction 0 pulse Number low set -9999~99 99 0 个 a P
+Pn122 Internal position instruction 1 pulse Number high set -9999~99 99 0 ten thousand pulse P
+Pn123 Internal position instruction 1pulse Number low set -9999~99 99 0 a P
+Pn124 Internal position instruction 2pulse Number high set -9999~99 99 0 ten thousand pulse P
+Pn125 Internal position instruction 2 pulse Number set low -9999~99 99 0 a P
+Pn126 Internal position instruction 3 pulse high setting -9999~99 99 0 ten thousand pulse P
+Pn127 Internal position instruction 3 pulse Number set low -9999~99 99 0 a P
+Pn128 Internal position command zero speed 0~3000 100 r/min P
+Pn129 Internal position command 1 speed 0~3000 100 r/min
+Pn130 Internal position command 2speed 0~3000 100 r/min P
+Pn131 Internal position command 3 speed 0~3000 100 r/min P
+Pn132 Torque/speed control switch to the position control 0~1 0 P
+Pn133 Torque/speed control switch to the position control of the deceleration time 5-10000 100 ms P
+Pn134~Pn145 internal use - - -
+# Speed control parameter
+Pn146◆ Speed instruction deceleration mode 0~2 1 S
+Pn147◆ Speed instruction S curve and deceleration time constant Ts 5~ 1500 80 ms S
+Pn148◆ Speed instruction S curve acceleration time constant of Ta 5~ 10000 80 ms S
+Pn149◆ Speed instruction S curve deceleration time constant of Td 5~ 10000 80 ms S
+Pn150◆ acceleration time constant 5~30000 80 ms S
+Pn151◆ deceleration time constant 5~30000 80 ms S
+Pn152▲ Speed detection filter time constant 1~380 10 0.1ms All
+Pn153 The speed regulator proportional gain 1 5~ 2000 100 % All
+Pn154 Speed regulator integral time constant of 1 5~ 2000 100 % All
+Pn155 The speed regulator proportional gain 2 5~ 2000 100 % All
+Pn156 Speed regulator integral time constant 2 5~ 2000 100 % All
+Pn157▲ Simulation speed instruction smoothing filtering time 1~500 1 0.1ms S
+Pn158 The directive gain simulation speed 1~1500 300 r/min/V S
+Pn159 Simulation speed instruction offset adjustment -5000~5000 mv S
+Pn160 Simulation speed instruction direction 0-1 0 S
+Pn161 Simulation speed instruction to enforce zero range 0~1000 0 10mv S
+Pn162 Simulation speed instruction to enforce zero range limit -1000~0 0 10mv S
+Pn163 Zero speed clamp lock mode 0-1 0 S
+Pn164 Zero speed clamp is triggered 0~1 0 S
+Pn165 The clamp level zero speed 0~200 6 r/min S
+Pn166 Zero speed clamp deceleration time 5~10000 50 ms S
+Pn167 Internal position controller gain 5~2000 100 % All
+Pn168 speed instruction source select 0~1 0 S
+Pn169 Internal speed reference 1 -5000-5000 0 R/min S
+Pn170 internal speed instruction 2 -5000-5000 0 R/min S
+Pn171 Internal speed instruction 3 -5000-5000 0 R/min S
+Pn172 Internal speed instruction 4 -5000-5000 0 R/min S
+Pn173 Internal speed instruction 5 -5000-5000 0 R/min S
+Pn174 Internal speed instruction 6 -5000-5000 0 R/min S
+Pn175 Internal speed instruction 7 -5000-5000 0 R/min S
+Pn176 Internal speed instruction 8 -5000-5000 0 R/min S
+Pn177 JOG speed 0~5000 200 r/min S
+Pn178 JOG speed up the time 5~ 10000 100 ms S
+Pn179 JOG Deceleration time 5~ 10000 100 ms S
+Pn180~Pn185 Internal use
+# Torque control parameters
+Pn186 Torque command deceleration mode 0~1 0 T
+Pn187▲ torque instruction linear deceleration time constant 1~30000 1 ms T
+Pn188▲ \Analog torque instruction smooth filtering time 1~500 1 0.1ms T
+Pn189 \Analog torque instruction gain 1-300 30 %/V T
+Pn190 \Analog torque instruction offset adjustment -1500~1500 0 mv T
+Pn191 \Simulation of torque command direction 0-1 0 T
+Pn192 Q shaft torque regulator proportional gain is 1 5~ 2000 100 % All
+Pn193 Q shaft torque regulator integral time constant of 1 5~ 2000 100 % All
+Pn194 Proportional gain 2 Q shaft torque regulator 5~ 2000 100 % All
+Pn195 Q shaft torque regulator integral time constant 2 5~ 2000 100 % All
+Pn196 Torque Q axis filter time constant of 1 1-500 1 0.1ms All
+Pn197 Filtering time constant torque Q 2 1~500 1 0.1ms All
+Pn198 Torque control speed limit 0~4500 2500 r/min T
+Pn199 Source of limited torque control speed choice 0~2 0 T
+Pn200 The internal torque 1 -300~300 0 % T
+Pn201 The internal torque 2 -300~300 0 % T
+Pn202 The internal torque 3 -300~300 0 % T
+Pn203 The internal torque 4 -300~300 0 % T
+Pn204 Torque command source 0~1 0 T
+Pn205 D shaft torque regulator proportional gain 5~2000 100 % All
+Pn206 D shaft torque regulator integral time constant 5~2000 100 % All
+Pn207 Speed feedback adjustment coefficient 1~3000 100 T
+Pn208 track torque instruction judgment error range 1 0~300 5 % T
+Pn209 tracking torque instruction judgment error range 2 0~300 2 % T
+Pn210~Pn219 internal use
+# Extension control parameters

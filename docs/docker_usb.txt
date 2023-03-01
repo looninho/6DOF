@@ -1,0 +1,146 @@
+docker run --ip 172.21.5.10 -it --rm --privileged -e DISPLAY=host.docker.internal:0.0 -e LIBGL_ALWAYS_INDIRECT=1 -e XCURSOR_SIZE=16 -v "e:\dev\instrumentation\hardware\6DOF":/6dof:rw --name=pymodbus_usb ghcr.io/pymodbus-dev/pymodbus:dev bash
+
+apt update
+apt upgrade
+apt install libgl1 libglib2.0-0
+
+apt install '^libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev
+##################################
+# 20230228
+##################################
+
+start docker desktop
+
+start Ubuntu WSL
+check CDIR range and IP: 
+lsusb
+cat /proc/net/fib_trie
+172.23.48.0/20
+172.23.58.225
+
+check vEtherneet(WSL) IP:
+ipconfig
+172.23.48.1
+255.255.240.0
+wsl --list --all --verbose
+usbipd list
+usbipd wsl attach -d Ubuntu -b 2-1
+
+check in Ubuntu WSL:
+lsusb
+usbip
+
+run docker container with IP address in CIDR range check:
+https://tehnoblog.org/ip-tools/ip-address-in-cidr-range/
+docker run --ip 172.23.48.50 -it --rm --privileged -v "e:\dev\instrumentation\hardware\6DOF":/6dof:rw --name=pymodbus_usb ghcr.io/pymodbus-dev/pymodbus:dev bash
+
+test python:
+from serial.tools.list_ports import comports
+list_comm = comports()
+from pymodbus.client import ModbusSerialClient as ModbusClient
+from pymodbus.framer.rtu_framer import ModbusRtuFramer
+
+client = ModbusClient(port=list_comm[0].device, framer=ModbusRtuFramer, baudrate=115200, bytesize=8, parity='O', stopbits=1, strict=False)
+
+for p in client.params.__dict__.keys():
+    print(p, ": ", client.params.__getattribute__(p))
+    print('-'*79)
+
+motor_id = 1
+start_addr, count = 8, 2
+rr = client.read_holding_registers(start_addr, count, slave=motor_id)
+for i in range(count):
+    print(f"address {start_addr+i}: {rr.getRegister(i)}")
+
+##################################
+# 
+##################################
+
+# Windows termnal:
+usbipd list
+wsl --list --all --verbose
+ipconfig
+usbipd wsl attach -d Ubuntu -b 2-1
+usbipd wsl detach -b 2-1
+
+# WSL2 Ubuntu:
+lsusb
+cat /proc/net/fib_trie
+
+
+##################################
+# config 1: WSL Ubuntu
+# vEthernet (WSL) fixed ip 172.22.144.1 / 255.255.240.0
+##################################
+loon@HP15:~$ cat /proc/net/fib_trie
+Main:
+  +-- 0.0.0.0/0 3 0 5
+     |-- 0.0.0.0
+        /0 universe UNICAST
+     +-- 127.0.0.0/8 2 0 2
+        +-- 127.0.0.0/31 1 0 0
+           |-- 127.0.0.0
+              /8 host LOCAL
+           |-- 127.0.0.1
+              /32 host LOCAL
+        |-- 127.255.255.255
+           /32 link BROADCAST
+     +-- 172.26.32.0/20 2 0 2
+        +-- 172.26.32.0/23 2 0 2
+           |-- 172.26.32.0
+              /20 link UNICAST
+           |-- 172.26.33.13
+              /32 host LOCAL
+        |-- 172.26.47.255
+           /32 link BROADCAST
+Local:
+  +-- 0.0.0.0/0 3 0 5
+     |-- 0.0.0.0
+        /0 universe UNICAST
+     +-- 127.0.0.0/8 2 0 2
+        +-- 127.0.0.0/31 1 0 0
+           |-- 127.0.0.0
+              /8 host LOCAL
+           |-- 127.0.0.1
+              /32 host LOCAL
+        |-- 127.255.255.255
+           /32 link BROADCAST
+     +-- 172.26.32.0/20 2 0 2
+        +-- 172.26.32.0/23 2 0 2
+           |-- 172.26.32.0
+              /20 link UNICAST
+           |-- 172.26.33.13
+              /32 host LOCAL
+        |-- 172.26.47.255
+           /32 link BROADCAST
+CIDR range chack (https://tehnoblog.org/ip-tools/ip-address-in-cidr-range/): IP Address 172.22.144.1 is in CIDR range 172.22.144.0/20
+
+##################################
+# config 2: docker container ubuntu
+##################################
+docker run -it --rm --privileged -e DISPLAY=host.docker.internal:0.0 -v "E:\dev\instrumentation\hardware\6DOF":/6dof:rw ubuntu bash
+
+apt update
+apt upgrade
+apt install --fix-missing linux-tools-virtual hwdata
+update-alternatives --install /usr/local/bin/usbip usbip `ls /usr/lib/linux-tools/*/usbip | tail -n1` 20
+
+cat /proc/net/fib_trie:
++-- 172.17.0.0/16 2 0 2
+        +-- 172.17.0.0/30 2 0 2
+           |-- 172.17.0.0
+              /16 link UNICAST
+
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' a2e3c3f470e2
+
+#####################################
+# config 2: docker container ubuntu
+# with fixed ip
+#####################################
+https://stackoverflow.com/questions/27937185/assign-static-ip-to-docker-container
+
+docker network create --subnet=172.26.32.0/20 mynet123
+
+docker run --net mynet123 --ip 172.26.33.13 -it --rm --privileged -e DISPLAY=host.docker.internal:0.0 -v "E:\dev\instrumentation\hardware\6DOF":/6dof:rw ubuntu bash
+
+ip addr
