@@ -1,0 +1,429 @@
+# NO.;Name;Range;Unit;Apply
+& 
+Pn000;0;Parameter editing and initialization;0-3;1;;All
+[Setting value;function]
+0: Parameter initialization prohibited
+1: Allows parameter initialization, but does not initialize Pn001, Pn080, Pn159, Pn190, and other application independent functional parameters. 
+2: Restore settings before shipment.
+3: Press button to view mode and cannot modify parameters.
+&
+Pn001;1;Motor code;0-70;7;;All
+[]
+The motor code must be set up with the motor, so that the motor can work properly.
+&
+Pn002;1;Control mode;0-
+[Setting value;control mode]
+0:Torque mode
+1:Speed mode
+2:Location mode
+3:Position / speed mode
+4:Position / torque model
+5:Speed / torque mode
+When set to 3, 4, and 5, switching between modes is determined by the Cmode signal status of the input port SigIn.
+For control mode switching, see Appendix B
+& 
+Pn003;0;Servo enable mode;0-1;0;;All
+[Setting value;function]
+0:The SON enable drive from the input port SigIn
+1:Automatically enable drive after power on
+&
+Pn004;0;Servo disconnect enable shutdown mode;0-2;0;;All
+When the enable signal changes from valid to invalid, the motor can he stopped operating:
+[Setting value;Electromagnetic brake;Deceleranion stop;Explain]
+0:Not used;Not used;Inertia stop
+1:Not used;Use;Slow down and stop. The deceleration time is determined by Pn005
+2:Use;Not used;Electromagnetic braking mode parking (suitable for motors with electromagnetic brakes)
+&
+Pn005;0;Break down to slow down;5-10000;100;ms;All
+When the signal is changed from valid to invalid, the motor is slowed down to zero. In the deceleration process, if the enable signal is effective again. the motor will slow down to zero
+&
+Pn006;0;Use / do not use Positive and negative drive prohibited;0-3;0;;All
+To set the parameter value, you can choose to use or not use the drive disable function. The truth table is as follows:
+[Setting value;Forward drive inhibit;Reverse drive inhibit]
+0:Not used;Not used
+1:Not used;Use
+2:Use;Not used
+3:Use;Use
+&
+Pn007;0;Positive / reverse drive, no stopping,	deceleration time;0-10000;60;ms;All
+When a overrun occurs, the SigIn port is either CCWL or CWL, and Pn077 is used to set the OFF alarm. Over time, the motor can decelerate in accordance with the deceleration time,	while clearing the position command pulse (position control), after stopping, the internal position is locked. The internal position gain is adjusted via the Pn167.
+&
+Pn008;0;internal forward torque limit (CCW);0-300;300;%;All
+&
+Pn009;0;internal reverse torque limit (CW);-300-0;-300;%;All
+&
+Pn010;0;external forward torque limit (CCW);0-300;300;%;All
+&
+Pn011;0;external reverse torque limit (CW);-300-0;-300;%;All
+set the torque limit in the motor CCW/CW direction. When the internal and external torque limits are in effect,	the actual torque is taken as a smaller limit.
+the external torque limit is controlled by the Sigln port TCCWL and TCWL.
+The maximum output torque of some motors is two times the rated torque, and the maximum torque output of the motor is limited to two times the rated torque automatically.
+Pn010;0;external forward torque limit (CCW);0-300;300;%;All
+&
+Pn012;0;Forward (CCW) torque overload 1 alarm level;0-300;200;%;All
+&
+Pn013;0;Reverse (CW) torque overload 1 alarm level;-300-0;-200;%;All
+&
+Pn014;0;Torque overload 1 alarm detection time;1-900;250;100 ms;All
+&
+Pn015;0;Overload 2 detection time;1-300;80;100 ms;All
+Overload 1 alarm level refers to the percentage of overload overcurrent relative to the rated output current of the motor. The overload capacity is between 0 and the maximum output current. Overload 1 overload capacity defaults to 2 times torque, in the set time, if more than 2 times the output torque,	will perform overload 1 protection.
+During the set time, when the motor reaches the rated torque output multiples, the overload 2 protection will be carried out
+If the overload level setting is greater than the corresponding internal / external torque limit values, overload conditions may not be met and protection will not work.
+&
+Pn016;1;Molecular DA for frequency division output of an incremental encoder;1-127;1;;All
+&
+Pn017;1;The denominator of frequency division output of incremental encoder DB;1-127;1;;All
+The output ratio of the incremental encoder is used to segment the pulse signal of the encoder,	and only applies to the servo unit with incremental encoder. Frequency division must be satisfied: DA/DB>=1. For example, the encoder is 2500 lines and the frequency division value is DA/DB=25/8. Then the number of lines after dividing is 2500/ (DA/DB) =2500/ (25/8) =800 lines.
+&
+Pn018;1;Encoder output pulse AB phase logic inversion;0-1;0;;All
+[Setting value;function]
+0:The motor counter clockwise rotation A ahead B: clockwise rotation before B ultrasonic A
+1:The motor rotates counterclockwise A before the B ultrasonic: clockwise rotation A ahead of B
+&
+Pn019;1;Rated current setting;0.0-100.0;0;Arms;All
+&
+Pn020;1;Rated speed setting;0-5000;Rated speed;r/min;All
+If the parameter is set to 0, the default value set by the manufacturer is used: otherwise, the user must set the parameter value strictly according to the rated current, the effective value and the rated speed of the motor and the corresponding internal and forward torque limit values. The motor will not operate properly if it is improperly set up. Depending on the drive type and the motor code, the maximum actual current value available is different. General users, please do not modify
+&
+Pn021;0;Reach a predetermined speed;0-5000;500;r/min;All
+&
+Pn022;0;Arrive at a predetermined speed, lag, compare difference;0-5000;30;r/min;All
+&
+Pn023;0;Arrive at a predetermined speed, direction of detection;0-2;0;;All
+When the motor speed exceeds the set decision value, the Sreach of the output port SigOut will be converted to ON, otherwise OFF.
+The comparator has hysteresis comparison characteristics. The value of the difference setting is too small, the higher the output signal turn off frequency is, the larger the setting value is, the smaller the turn off frequency is, but at the same time the resolution of the comparator is reduced. Example: the preset. speed is set to 100, and the difference is set to 10.
+
+/\
+|      Difference value
+|-->--|-->--|
+| OFF |     | ON
+|_____|_____|______> speed
+
+You can set the speed detection direction as follows:
+[Pn023;comparator]
+0:Reverse and reverse detection
+1:Only positive rotation speed is detected; when reversal, the signal is OFF
+2:The reverse speed is detected only. When the signal is positive, the signal is OFF
+&
+Pn024;0;arrival torque;0-300;100;%;All
+&
+Pn025;0;Lag difference between arrival torque and preset torque;0-300;5;%;All
+&
+Pn026;0;Reach the desired torque direction;0-2;0;;All
+When the operating torqe of the motor exceeds the set decision value, the Treach of the output port SigOut will	be converted to ON, or not OFF.
+Torque detection direction can be set as follows:
+[Pn026;comparator]
+0:Reverse and reverse detection
+1:Only positive torque is detected; when reversal, the signal is OFF.
+2:Reverse torque is detected only when the forward turn signal is OFF.
+&
+Pn027;0;Zero velocity detection range set;0-1000;10;r/min;All
+&
+Pn028;0;Zero speed test return error;0-1000;5;r/min;All
+When the motor speed is lower than the set speed value,	the zerospeed of the output port SigOut is changed to ON, otherwise OFF.
+&
+Pn029;0;Zero speed detection point of motor electromagnetic brake;0-1000;5;r/min;All
+Only when the electromagnetic brake function is used, will the motor be judged to be a zero speed state.
+&
+Pn030;0;Delay time of electromagnetic brake when the motor is stationary;0-2000;0;ms;All
+When the motor is stationary,	the electromagnetic brake starts the delay time of the motor to cut off the current.
+When using the electromagnetic braking function, the servo break enable mode Pn004 must be set to 2.
+&
+Pn031;0;When the motor is running, the electromagnetic brake wait time;0-2000;500;ms;All
+When the motor is running, the motor breaks the currett to the time between the brake of the electromagnetic brake.
+&
+Pn032;0;The speed of the electromagnetic brake when the motor is running;0-3000;30;r/min;All
+When the motor is running, when the motor is less than the spend set by this parameter, the magnetic brake starts to brake.
+&
+Pn033;0;Origin regression trigger mode;0-3;0;;All
+The origin regression method is shown in Appendix F.
+[Setting value;function]
+0:Turn off the origin regression function
+1:Triggered by the GOH level of the input port SigIn
+2:Triggered by the rising edge of the input port SigIn GOH
+3:Automatic execution of power on
+&
+Pn034;0;Origin regression reference point mode;0-6;0;;All
+Note: when CCWL or CWL is used as a reference point, you need to set the Pn006 parameter and turn on the function.
+[Setting value;function]
+0:The REF is turned (triggered by the rising edge) as the reference point
+1:Flip for REF (rising edge trigger) as reference point
+2:The CCWL is being turned (triggered by the failing edge) as the reference point
+3:Reverse find CWL (drop edge trigger) as reference point
+4:The Z pulse is being turned to the reference Point
+5:Turn the Z pulse for reference point
+6:Absolute zero as reference point
+&
+Pn035;0;Origin regression origin mode;0-2;0;;All
+[Setting value;function]
+0:Look for the origin of the Z pulse backward
+1:Look for the origin of the Z pulse forward
+2:The origin is raised directly at the rising edge of the refenrece point
+&
+Pn036;0;Origin position offset high;-9999-9999;0;ten thousand pulse;All
+&
+Pn037;0;Origin position offset low;-9999-9999;0;pulse;All
+When the origin is found, the offset (Pn036*10000+, Pn037) is added as the actual origin.
+&
+Pn038;0;Origin regression first speed;1-3000;200;r/min;All
+&
+Pn039;0;Origin regression second speed;1-3000;50;r/min;All
+When the origin return operation is performed, the reference point is searched at the first speed, and the original point is searched at the second speed after reaching the reference point. The second speed should be less than the first speed.
+&
+Pn040;0;Origin regression acceleration time;5-10000;50;ms;All
+&
+Pn041;0;Origin regression deceleration time;5-10000;50;ms;All
+In origin regression execution, the motor is accelerated from zero to the rated speed and is used only for origin return operations.
+&
+Pn042;0;Origin on tine delay;0-3000;60;ms;All
+After reaching the origin, the motor is completely stationary for a period of time delay. After completion of the delay, the HOME output of the output port SigOut is changed to ON.
+&
+Pn043;0;The origin regression completes the signal delay;5-3000;80;ms;All
+HOME sustained effective time
+&
+Pn044;0;Origin return instruction execution mode;0-1;0;;All
+[Setting value;function]
+0:When the origin return is complete,	wait for the HOME
+signal	to become OFF, then receive and	execute instructions.
+1:When the origin return is complete, the instruction is received and executed immediately.
+&
+Pn045;0;Gain switching selection;0-5;0;;All
+[Setting value;function]
+0:Fixed first gain.
+1:Fixed second gain.
+2:Controlled by the Cgain terminal of the input port SigIn, the OFF is first gain and the ON is second gain.
+3:Controlled by the speed command, when the speed command exceeds Pn046, the switch is switched to first gain
+4:When the position deviation exceeds Pn046, the switch is switched to first gain by pulse bias control.
+5:Controlled by the motor speed, when the position deviation exceeds Pn046, the switch is switched to first gain.
+Gain switching is shown in Appendix A
+&
+Pn046;0;Gain switching level;0-30000;80;;All
+&
+Pn047;0;Gain switching back difference;0-30000;6;;All
+Depending on the setting of the Pn045 parameter, the conditions and units for switching are different:
+[Pn045;Gain switching condition;Unit]
+3:Speed command;r/min
+4:Pulse deviation;Pulse
+5:motor speed;r/min
+&
+Pn048;0;Gain switching delay time;0-20000;20;0.1 ms;All
+The gain switching condition satisfies the delay time of the start switch. if the switch condition is detected during the delay phase, the switchover is canceled.
+&
+Pn049;2;Gain switching time 1;0-15000;0;0.1 ms;All
+&
+Pn050;2;Gain switching time 2;0-15000;50;0.1 ms;All
+When the gain is switched, the current gain combination is linearly smoothed at this time, gradually varying to the target gain combination, and each parameter in the combination varies simultaneously.
+&
+Pn051;0;Maximum speed limit for motor operation;0-5000;3000;;All
+Used to limit the maximum speed of motor operation. The setting value shall be less than or equal to the rated speed,	otherwise the maximum speed at which the motor can run is rated speed.
+&
+Pn052;1;SigInl port function allocation;-31-31;1;;All
+&
+Pn053;1;SigIn2 port function allocation;-31-31;2;;All
+&
+Pn054;1;SigIn3 port function allocation;-31-31;19;;All
+&
+Pn055;1;Sigln4 part function allocation;-31-31;8;;All
+&
+Pn220;1;SigIn5 port function allocation;-31-31;3;;All
+&
+Pn221;1;SigIn6 port function allocation;-31-31;4;;All
+&
+Pn222;1;SigIn7 port function allocation;-31-31;9;;All
+&
+Pn223;1;SigIn8 port function allocation;-31-31;10;;All
+&
+Pn224;1;SigIn9 port function allocation;-31-31;11;;All
+&
+Pn225;1;SigIn10 port function allocation;-31-31;0;;All
+Specific function allocation, refer to SigIn function detailed table.
+-1~-31 function number is 1-31 function number,	the corresponding negative
+logic function is the same, the effective level	is opposite.
+[Setting value;Sigln input level;Sigln corresponding function number]
+Positive;Low level;ON
+Positive;High level;OFF
+negative;Low level;OFF
+negative;High level;ON
+&
+PnO56;0;SigIn1 port filtering time;1-1000;2;ms;All
+&
+Pn057;0;SigIn2 port filtering time;1-1000;2;ms;All
+&
+Pn058;0;Sig1n3 port filtering time;1-1000;2;ms;All
+&
+Pn059;0;Sig1n4 port filtering time;1-1000;2;ms;All
+&
+Pn226;0;SigIn5 port filtering time;1-1000;2;ms;All
+&
+Pn227;0;SigIn6 port filtering time;1-1000;2;ms;All
+&
+Pn228;0;SigIn7 port filtering time;1-1000;2;ms;All
+&
+Pn229;0;SigIn8 port filtering time;1-1000;2;ms;All
+&
+Pn230;0;SigIn9 port filtering time;1-1000;2;ms;All
+&
+Pn231;0;SigIn10 port filtering time;1-1000;2;ms;All
+Perform digital filtering on the input port Sigln.
+&
+Pn060;1;SigOut1 port function allocation;-14-14;2;;All
+&
+Pn061;1;SigOut2 port function allocation;-14-14;1;;All
+&
+Pn062;1;SigOut3 port function allocation;-14-14;4;;All
+&
+Pn063;1;SigOut4 port function allocation;-14-14;7;;All
+&
+Pn232;1;SigOut3 port function allocation;-14-14;9;;All
+&
+Pn233;1;SigOut4 port function allocation;-14-14;10;;All
+[parameter values;Corresponding function number;SigOut output results]
+Positive:ON;Low level
+Positive:OFF;High level
+negative;OFF;Low level
+negative;ON;High level
+Specific function allocation, refer to SigOut function detailed table.
+&
+Pn064;1;communication mode;0-2;2;;All
+[Setting value;function]
+0;No communication
+1:RS-232
+2:RS-485
+The communication protocol is detailed in the seventh chapter Modbus communication function
+&
+Pn065;0;Communication station;1-254;1;;All
+When using Modbus communication, each group of drivers should set different site numbers in advance. If the site number is repeatedly set,	the communication will be paralyzed.
+&
+Pn066;1;Communication baud rate;0-5;5;;All
+[Setting value;baud rate]
+0:4800
+1:9600
+2:19200
+3:38400
+4:57600
+5:115200
+&
+Pn097;1;Communication mode setting;0-8;8;;All
+The parameter values are defined in the following table, as shown in Chapter seventh, Modbus communication function
+[Set up;format]
+0;7,N,2	( Modbus, ASCII )
+1;7,E,1	( Modhus, ASCII )
+2;7,O,1	( Modbus, ASCII )
+3;8,N,2	( Modbus, ASCII )
+4;8;E;1	( Modbus;ASCII )
+5;8,O,1	( Modbus, ASCII )
+6;8,N,2	( Modhus, RTU )
+7;8,E,1	( Modbus, RTU )
+8;8,O,1	( Modbus, RTU )
+&
+Pn068;0;The input function control mode selects	the register 1;0-32767;0;;All
+Certain functions are controlled by means of communication or port input. if the communication mode is not controlled, 0 can be set.
+Pn068 parameter:
+BIT:BIT15;BIT14;BIT13;BIT12;BIT11;BIT10;BIT9;BIT8;BIT7;BIT6;BIT5;BIT4;BIT3;BIT2;BIT1;BIT0
+Function:Retain;Cgain;Cmode;TR2;TR1;Sp3;Sp2;Sp1;ZeroLock;EMG;TCW;TCCW;CWL;CCWL;Alarmrst;Son
+Default value:0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+&
+Pn069;0;The input function control mode selects the register 2;0-32767;0;;All
+Pn069 parameter:
+BIT:BIT15;BIT14;BIT13;BIT12;BIT11;BIT10;BIT9;BIT8;BIT7;BIT6;BIT5;BIT4;BIT3;BIT2;BIT1;BIT0
+Function:Retain;Punlock;Pdistance;Psource;Pstop;Ptrigger;Pos2;Pos1;REF;GOH;PC;INH;Pclear;Cinv;Gn2;Gn1
+Default value:0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0
+In communication control, the above functions are determined by the input port on the CN2 or by the communication control. Set to 0, the control is changed by the input port on the CN2; set to 1, then changed by the communication control. The default is entirely controlled by the input port. For example: son SP3 SP2 SP1 function through the communication control and other control through the input port, the setting value is 00000111...00000001 (binary) / Ox0701 (sixteen m) -->1793 (decimal), so set the Pn068 parameter to 1793.
+&
+Pn070;0;Input function logic status setting register 3;0-32767;32691;;All
+Pn070 parameter:
+position:BIT15;BIT14;BIT13;BIT12;BIT11;BIT10;BIT9;BIT8;BIT7;BIT6;BIT5;BIT4;BIT3;BIT2;BIT1;BIT0
+Function:Retain;Cgain;Cmode;TR2;TR1;Sp3;Sp2;Sp1;ZeroLock;EMG;TCW;TCCW;CWL;CCWL;Alarmrst;Son
+Default value:0;1;1;1;1;1;1;1;1;0;1;1;0;0;1	
+&
+Pn071;0;Input function logic status setting register 3;0-32767;32767;;All
+When RS232 or RS485 communication is carried out, Pn068 is set up, and the corresponding bis of Pn069 are controlled by communication, and the position of the corresponding parameter is set or cleared to control the status of the input function signal. Logical 0 is valid.
+Pn071 parameter:
+position:BIT15;BIT14;BIT13;BIT12;BIT11;BIT10;BIT9;BIT8;BIT7;BIT6;BIT5;BIT4;BIT3;BIT2;BIT1;BIT0
+Function:Retain;Punlock;Pdistance;Psource;Pstop;Ptrigger;Pos2;Pos1;REF;GOH;PC;INH;Pclear;Cinv;Gn2;Gn1
+Default value:1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1
+In the communication control mode, by setting the bits of this register, we can achieve the effect of CN2 external input signal control. For example: the driver in the position control mode, to prohibit the pulse command, set the Pn071 BIT4 settings 0, then the input pulse becomes invalid. Non communication control, set the value of the reference, are invalid.
+Note: each time the power is on, the drive automatically loads the values of the Pn070, Pn071 registers, and executes the corresponding operations immediately. Therefore, before the enable motor, the input function signal is determined to enter the correct working state.
+&
+Pn072;0;The input function control mode selects the register 3;0-1;0;;All
+Pn072 parameter:
+Position:BIT15-BIT1;BIT0
+Function:Retain;Sen
+Default value:0;0
+&
+Pn073;0;Input function logic status setting register 30;0-1;1;;All
+Pn073 parameter
+Position:BIT15-BIT1;BIT0
+Function:Retain;Sen
+Default value:0;1
+&
+Pn074;0;Fan opening temperature;30-70;50;°C;All
+&
+Pn075;0;Fan operation mode;0-2;0;;All
+Pn075;Fan operation mode	
+0:Temperature sensing automatic operation	
+1:Boot operation	
+2:Close	
+&
+Pn076;0;Emergency shutdown (EMG) reset mode;0-1;0;;All
+Clear the EMG (AL-14) alarm condition after the EMG status OFF is lifted:
+[Setting value;Function]
+0:The servo must enable the OFF to he cleared by manual or port SigIn:AlarrniRst.
+1:No matter the servo enable ON or OFF, the EMG changes to ON again and will be automatically cleared.
+In the enabling ON state, if the external command input, the EMG alarm is automatically cleared, the instructions are executed immediately.
+&
+Pn077;0;Positive / reverse drive forbidden. detection;0-2;0;;All
+If you use the ccwl or CWL function, when ccwl or CWL is the OFF state,	you can set whether or not to issue a AL-15 alarm:
+[Setting value;function]
+0:Do not alarm,	slow down and stop.
+1:When the motor is running, when the deceleration is stopped, the alarm is sent out,	and the motor is no longer energized.
+2:Alarm immediately, motor power off, free stop.
+&
+Pn078;0;Undervoltage detection;0-1;1;;All
+[Setting value;Function]
+0:Not detected
+1:detection
+&
+Pn079;0;System status display project selection;0-30;0;;All
+After the drive is powered on automatically enter the monitor mode menu Dn000 submenu.	By default, the state display system according to the manufacturer the way (motor speed), the user can set the parameter values, the Dn000 display system state specific parameters, specifically refer to "monitor model	list".
+0 system defaults (motor speed)
+1 speed command 
+2 average torque 
+3 position deviation	
+4 AC power supply voltage	
+5 maximum instantaneous torque	
+6 pulse input frequency	
+7 heat sink temperature	
+8 current motor speed 
+9 the effective input command pulse accumulated value is low
+10 the effective input command pulse accumulation value is high
+11 position control, the encoder effective feedback pulse accumulated value is low
+12 position control, the encoder effective feedback pulse accumulation value is high
+13 regenerative braking load rate
+14 input port signal status	
+15 output port signal status
+16 analog torque command voltage	
+17 analog speed command voltage
+18 output function status register
+19 after servo power on, the encoder feedback pulse accumulated value is low
+20 servo power on, the encoder feedback pulse accumulation value is high
+21 drive software version
+22 encoder UVW letter	
+23 rotor absolute position 
+24 drive type
+25 absolute encoder single loop low data	
+26 absolute encoder single loop data high
+27 absolute encoder multi ring data low	
+28 absolute encoder multi ring data high
+29 load inertia ratio display
+&
+Pn080;0;Incremental encoder line number;0-16000;0;line;All
+The number of encoders mounted on the motor shaft. Setting values must be specified with the encoder line number nominal values are exactly the same, the motor angle encoder installation and wiring connection with defined drive, otherwise blocking of the motor run or position deviation and other non normal instruction execution. General users do not need to modify this parameter, the default value can he. If the encoder is absolute encoder, this parameter setting is invalid.
+When 0 values are taken, it is the line value of the motor standard encoder.
+&
+Pn081;0;User parameter permanent write operation;0-1;0;;All
+Corresponding auxiliary mode Fn001 operation. Writes all parameter values of the current Pn000-Pn219 to EEPROM. When the parameter value is changed from 0 to 1,	the driver will execute a write operation. This operation is only valid when communicating (Pn064>0).
+&
+pn082;0;SigOut port forced output;0-4095;0;;All
+

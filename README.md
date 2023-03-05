@@ -22,15 +22,20 @@ WIP: implement functions for:
 - 356~365 for Fn000~Fn???
 - 368~396 for Dn000~Dn028
 
-## installation
+## Installation: using Docker
 
 Configuration: Host is Windows 10 with Docker Desktop, Ubuntu WSL, XLaunch (Xming) and usbipd installed. 
 
-### install usbip in Windows
+### install usbipd-win
 
-Download and install Wming X Server for Windows [here] (https://sourceforge.net/projects/xming/files/Xming/6.9.0.31/Xming-6-9-0-31-setup.exe/download)
+Follow instructions [here](https://github.com/dorssel/usbipd-win) to install `usbipd-win` software for sharing locally connected USB devices to other machines, including WSL 2
+
+### install X server for Windows
+Install Xming X Server for Windows [here](https://sourceforge.net/projects/xming/files/Xming/6.9.0.31/Xming-6-9-0-31-setup.exe/download)
 
 ### install usbip in Ubuntu WSL
+
+Ubuntu WSL is the bridge between the host (Windows 10) and the docker container where we'll develop.
 
 ```sh
 sudo apt update
@@ -38,6 +43,18 @@ sudo apt install linux-tools-virtual hwdata
 sudo update-alternatives --install /usr/local/bin/usbip usbip `ls /usr/lib/linux-tools/*/usbip | tail -n1` 20
 ```
 ### attach the rs485 usb device to WSL
+
+Check that Docker Desktop and WSL are running:
+```
+wsl -l -v
+``` 
+Should print:
+```
+  NAME                   STATE           VERSION
+* docker-desktop-data    Running         2
+  docker-desktop         Running         2
+  Ubuntu                 Running         2
+``` 
 
 In Windows terminal, list all usb devices attached: `usbipd list`.
 
@@ -49,27 +66,29 @@ Attach the COM port where the RS485 usb device is plugged: `usbipd wsl attach -d
 
 cd to this root dir where is the `Dockerfile` and build:
 ```sh
-docker build -f Dockerfile -t modbus6dof:dev .
+docker build --tag=modbus6dof:dev .
 ```
 
-#### run the container
+#### Run the container
 
-Check the Windows host IP with `ipconfig` and check the Ubuntu WSL IP with `cat /proc/net/fib_trie`
-
-By using this [website] (https://tehnoblog.org/ip-tools/ip-address-in-cidr-range/) select an IP address which matches CIDR (e.g. 172.24.245.10 for this tuto) then run the container:
+Check the vEthernet(WSL) IP address in Windows with `ipconfig` and check the Ubuntu WSL IP with `cat /proc/net/fib_trie`. By using this [website](https://tehnoblog.org/ip-tools/ip-address-in-cidr-range/) select an IP address which matches CIDR (e.g. 172.24.245.10 for this tuto) then run the container:
 ```sh
 docker run --ip 172.24.245.10 -it --rm --privileged -e DISPLAY=host.docker.internal:0.0 -v "e:\dev\instrumentation\hardware\6DOF":/6dof:rw --name=6dof_dev modbus6dof:dev bash
 ```
 
-### test
+### Test installation
 
-run the test app:
+run `XLaunch` from Windows host with default params
+
+run the test app in the container:
 ```sh
 cd /6dof
 python main_assd15.py
 ```
 
+### finish
 
+detach usb device physically or use this command: `usbipd wsl detach -b <BUSID>` in Windows terminal.
 ## Quick start (TODO)
 
 ## Basic test with `pymodbus`

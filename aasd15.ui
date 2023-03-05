@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>607</width>
-    <height>561</height>
+    <width>611</width>
+    <height>570</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,7 +36,7 @@
      </item>
     </layout>
    </widget>
-   <widget class="QGroupBox" name="groupBox_2">
+   <widget class="QGroupBox" name="function_select_group">
     <property name="geometry">
      <rect>
       <x>140</x>
@@ -50,21 +50,21 @@
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QRadioButton" name="radioButton">
+      <widget class="QRadioButton" name="pn_radio">
        <property name="text">
         <string>Pn</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QRadioButton" name="radioButton_2">
+      <widget class="QRadioButton" name="fn_radio">
        <property name="text">
         <string>Fn</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QRadioButton" name="radioButton_3">
+      <widget class="QRadioButton" name="dn_radio">
        <property name="text">
         <string>Dn</string>
        </property>
@@ -95,7 +95,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QSpinBox" name="spinBox">
+        <widget class="QSpinBox" name="slave_sp">
          <property name="toolTip">
           <string>device id</string>
          </property>
@@ -136,19 +136,19 @@
      <item>
       <layout class="QFormLayout" name="formLayout_2">
        <item row="0" column="0">
-        <widget class="QRadioButton" name="radioButton_4">
+        <widget class="QRadioButton" name="read_radio">
          <property name="text">
           <string>Read</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="lineEdit">
+        <widget class="QLineEdit" name="read_le">
          <property name="inputMask">
-          <string>999 / 09</string>
+          <string>999-99</string>
          </property>
          <property name="text">
-          <string> / </string>
+          <string>-</string>
          </property>
         </widget>
        </item>
@@ -157,26 +157,26 @@
      <item>
       <layout class="QFormLayout" name="formLayout_3">
        <item row="0" column="0">
-        <widget class="QRadioButton" name="radioButton_5">
+        <widget class="QRadioButton" name="write_radio">
          <property name="text">
           <string>Write</string>
          </property>
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QLineEdit" name="lineEdit_2">
+        <widget class="QLineEdit" name="write_le">
          <property name="inputMask">
-          <string>999 / 99 / 9999 / 9999 / 9999</string>
+          <string>999-9-99999</string>
          </property>
          <property name="text">
-          <string> /  /  /  / </string>
+          <string>--</string>
          </property>
         </widget>
        </item>
       </layout>
      </item>
      <item>
-      <widget class="QPushButton" name="sendButton">
+      <widget class="QPushButton" name="send_pb">
        <property name="text">
         <string>Send</string>
        </property>
@@ -216,7 +216,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>607</width>
+     <width>611</width>
      <height>26</height>
     </rect>
    </property>
