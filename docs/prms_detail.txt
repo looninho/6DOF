@@ -1,4 +1,5 @@
 # NO.;Name;Range;Unit;Apply
+## systeme parameter
 & 
 Pn000;0;Parameter editing and initialization;0-3;1;;All
 [Setting value;function]
@@ -8,7 +9,6 @@ Pn000;0;Parameter editing and initialization;0-3;1;;All
 3: Press button to view mode and cannot modify parameters.
 &
 Pn001;1;Motor code;0-70;7;;All
-[]
 The motor code must be set up with the motor, so that the motor can work properly.
 &
 Pn002;1;Control mode;0-
@@ -386,7 +386,7 @@ Pn078;0;Undervoltage detection;0-1;1;;All
 1:detection
 &
 Pn079;0;System status display project selection;0-30;0;;All
-After the drive is powered on automatically enter the monitor mode menu Dn000 submenu.	By default, the state display system according to the manufacturer the way (motor speed), the user can set the parameter values, the Dn000 display system state specific parameters, specifically refer to "monitor model	list".
+After the drive is powered on automatically enter the monitor mode menu Dn000 submenu. By default, the state display system according to the manufacturer the way (motor speed), the user can set the parameter values, the Dn000 display system state specific parameters, specifically refer to "monitor model list".
 0 system defaults (motor speed)
 1 speed command 
 2 average torque 
@@ -423,7 +423,230 @@ The number of encoders mounted on the motor shaft. Setting values must be specif
 When 0 values are taken, it is the line value of the motor standard encoder.
 &
 Pn081;0;User parameter permanent write operation;0-1;0;;All
-Corresponding auxiliary mode Fn001 operation. Writes all parameter values of the current Pn000-Pn219 to EEPROM. When the parameter value is changed from 0 to 1,	the driver will execute a write operation. This operation is only valid when communicating (Pn064>0).
+Corresponding auxiliary mode Fn001 operation. Writes all parameter values of the current Pn000-Pn219 to EEPROM. When the parameter value is changed from 0 to 1, the driver will execute a write operation. This operation is only valid when communicating (Pn064>0).
 &
 pn082;0;SigOut port forced output;0-4095;0;;All
+Force the SigOut port to output the fixed level. By setting this parameter, the output level of the output port is forced.
+;Retain;SigOut5;SigOut4;SigOut3;SigOut2;SigOut1
+position:BIT15-10;BIT9-8;BIT7-6;BIT5-4;BIT3-2;BIT1-0
+Default value:0;0;0;0;0;0
+The output port truth table is as follows-
+SigOut2;SigOut1
+BIT3;BIT2;Output level;BIT1;BIT0;Output level
+0;0;Non coercive state;0;0;Non coercive state
+0;1;Forced high level;0;1;Forced high level
+1;0;Forced low level;1;0;Forced low level
+1;1;Non coercive state;1;1;Non coercive state
+SigOut4;SigOut3
+BIT7;BIT6;Output level;BIT5;BIT4;Output level
+0;0;Non coercive state;0;0;Non coercive state
+0;1;Forced high level;0;1;Forced high level
+1;0;Forced low level;1;0;Forced low level
+1;1;Non coercive state;1;1;Non coercive state
+SigOut5
+BIT9;BIT8;Output level
+0;0;Non coercive state
+0;1;Forced high level
+1;0;Forced low level
+1;1;Non coercive state
+Example: the output port Sig0ut2 forces the output to be low, and the other port states are not forced to output. The Pn082 parameter is set to 8.
+&
+Pn083;0;Low voltage alarm detection amplitude;50-280;200;V;All
+When the bus voltage is below this amplitude, the Pn078 determines whether or not the alarm is given.
+&
+Pn084;0;High temperature alarm detection amplitude;0-100;70;°C;All
+Wien the heat sink temperature is higher than this amplitude, the alarm will be sent out. If set to 0, screen the alarm.
+&
+Pn085;1;Pole count of motor;0-100;0;Right;All
+Default value for the drive when the parameter is 0.
+&
+Pn087;1;Selection of braking resistance;0-2;1;;All
+[Setting value;Function]
+0:No braking resistors are installed
+1:Use built in brake resistors
+2:Use an external braking resistor
+&
+Pn088;0;Brake resistor regeneration alarm level;50-250;90;%All
+The higher the overload rate of the resistor regeneration, the higher the resistance surface temperature.
+When the internal or external braking resistor,	the regenerative braking load rate is lower than the alarm level, the overload alarm is not carried out.
+Set Pn092=0, shield regeneration overload alarm.
+&
+Pn089;1;External braking resistance power;20-20000;100;W;All
+&
+Pn090;1;External braking resistance value;10-1000;100;Ohm;All
+Pn091;0;External brake resistance, regeneration, available capacity;5-75;20;%;All
+When using an external braking resistor (Pn087=2), a nominal resistance	power value, and resistance must be set.
+When the available capacity of the brake resistance is set, heat dissipation
+factors such as ambient temperature, ventilation intensity and resistance, heat dissipation characteristics must be taken into account, and the resistance shall be decreased. Braking resistor available capacity should not be too high, otherwise the resistance surface temperature up to several hundred degrees Celsius, burning resistance, causing fire. Please choose the brake resistor in safe condition. When the brake resistance is mounted on a large radiator, if it is naturally cooled, try to set 25%.	If a strong wind blows, try setting 45%. After checking the system for a period of time, check whether the resistance temperature is too high. After repeated attempts, the regenerative overload alarm still occurs, while the resistance temperature is within the allowable range, and the Pn092=0 can be set, that is to say,	no braking resistance is concerned.
+&
+Pn092;0;Overload detection of braking resistor;0-1;1;;All
+[Setting value;function]
+0:Do not issue alarm when regenerative overload occurs
+1:Issue alarm when regenerative overload occurs
+## Position control parameter
+&
+Pn096;1;Command pulse input mode;0-2;0;;P
+Pn096;;Direct order; Negative command
+0:Pulse + direction;3*PP Pulse from - to + then transition low then repeat and transition from PD- to +
+1:Forward / reverse pulse;3*PP Pulse from - to + then transition to low and from low then transiton to 3*PD pulse
+2:Quadrature pulse;3*PP Pulse from - to + then transition high then repeat and PD+-contracts to half pulse periode.
+&
+Pn097;1;Instruction pulse input direction logic selection;0-1;0	;;P
+[Setting value;Function]
+0:Enter the positive command and turn the motor counter clockwise (CCW)
+1:Enter the positive command and turn the motor clockwise (CW)
+&
+Pn098;0;Pulse electron gear ratio of molecule 1;1-32767;1;;P
+&
+Pn099;0;Pulse electron gear ratio of molecule 2;1-32767;1;;P
+&
+Pn100;0;Pulse electron gear ratio of molecule 3;1-32767;1;;P
+&
+Pn101;0;Pulse electron gear ratio of molecule 4;1-32767;1;;P
+&
+PnIO2;1;The denominator or a pulsed electronic gear ratio;1-32767;1;;P
+The molecular N of the electronic gear ratio is determined by GN1, GN2 of the input port SigIn.	Denominator fixing. Molecular selection follows:	
+GN2;GN1;Electronic gear ratio,	molecular N	
+OFF;OFF;Molecule 1	
+OFF;ON;Molecule 2	
+ON;OFF;Molecule 3	
+ON;ON;Molecule 4	
+&
+Pn103;0;The position deviation is out of range setting;1-2000;500;ten thousand pulse;P
+When the pulse number of the pulse deviation counter exceeds the net value (i.e. the difference between the current position and the target position), the driver sends out an alarm signal.
+&
+Pn104;0;Location positioning complete range setting;0-32767;10;pulse;P
+&
+Pn105;0;Location positioning complete backlash setting;0-32767;3;pulse;P
+When the residual pulse number of the offset counter is lower than the parameter setting value, the output port SigOut: Preach signal is ON, otherwise OFF.
+&
+Pn106;0;Location positioning complete range setting;0-32767;300;pulse;P
+&
+Pn107;0;Location positioning complete backlash setting;0-32767;30;pulse;P
+When the residual poise number of the offset counter is	lower than the parameter setting value, the Pnear signal of the output port SigOut is ON, otherwise OFF.
+&
+Pn108;0;Position deviation clearing mode;0-1;1;;P
+Position control, you can use the SigIn's Pclear function to clear the value of the position offset counter. Positional error clearing occurs at:
+[Setting value;Function]
+0:Pclear Level ON period
+1:Pclear Rising edge time (from OFF to ON)
+&
+Pn109;2;Position command acceleration and deceleration mode;0-2;0;;P
+[Setting value;Function]
+0:No filtering
+1:One time smooth filtering
+2:S shape filtering
+&
+Pn110;2;Position instruction, primary filtering, time constant;5-500;50;ms;P
+&
+Pn111;2;Ta position instruction, S shape filtering, time constant Ta;5-340;50ms;P
+&
+Pn112;2;Ts Position instruction, S shape filtering, time constant Ts;5-150;20;ms;P
+Filter time constant definition: the time from the current position, the instruction frequency, to the target instruction frequency. The longer the filtering time,	the better the frequency smoothness of the position instruction, but the greater the instruction response delay. On the occasions of step change of the instruction pulse frequency, the motor is operated smoothly. Filtering has no influence on the number of instruction pulses.
+Filter time T=Ta+Ts. Ta: straight part of time, the smaller the Ta, the faster the acceleration and deceleration. Ts: arc part time, the greater the Ts, the smoother the speed, the smaller the impact.
+&
+Pn113;0;Position loop feedforward gain;0-100;0;%;P
+&
+Pn114;1;Position loop,	feedforward filter, time constant;1-50;5;ms;P
+In position control, the position feedforward is directly applied to the speed command, which can reduce the tracking error of position and improve the response. If the feed forward gain is too large, it may cause velocity overshoot. The 
+feedforward commands can be smoothed.
+&
+Pn115;0;Position regulator gain 1;1-2000;100;1/S;P
+&
+Pn116;0;Position regulator gain 2;1-2000;100;1/S;P
+On the premise that the mechanical system does not produce vibration or noise, the position loop gain is increased to accelerate the reaction speed and shorten the positioning time.
+&
+Pn117;0;Location command source selection;0-3;0;;P
+[Setting value;Function]
+0:External pulse input
+1:Internal position instructions (see Appendix 6)
+2:The command source is determined by the SigIn:psource. On: internal position instruction; Off: external pulse input
+3:Motion controller instruction
+&
+Pn118;0;Internal position instruction pause mode selection;0-1;0;P
+[Setting value;Function]
+0:When the pstop trigger action is triggered again, the ptriger is driven according to the currently selected internal location command.
+1:When the pstop trigger action is triggered again, the ptriger continues to complete the last remaining internal position command pulses.
+&
+Pn119;0;Internal position suspension deceleration time;0-10000;50;ms;P
+In the internal position control, when the falling edge of the pstop occurs, the motor will decelerate from the current running speed to 0, and its deceleration time can be set by this parameter (for internal position control only).
+&
+Pn120;0;Internal position command 0 pulse number high setting;-9999-9999;0;Ten thousands;P
+&
+Pn121;0;Internal position command 0 pulse number low setting;-9999-9999;0;one;P
+&
+Pn122;0;Internal position command 1 pulse number high setting;-9999-9999;0;Ten thousands;P
+&
+Pn123;0;Internal position command 1 pulse number low setting;-9999-9999;0;one;P
+&
+Pn124;0;Internal position command 2 pulse number high setting;-9999-9999;0;Ten thousands;P
+&
+Pn125;0;Internal position command 2 pulse number low setting;-9999-9999;0;one;P
+&
+Pn126;0;Internal position command 3 pulse number high setting;-9999-9999;0;Ten thousands;P
+&
+Pn127;0;Internal position command 3 pulse number low setting;-9999-9999;0;one;P
+Internal position Instruction N (Mai Chongliang) = internal position command, N pulse number, high setting value * 10000 + internal position command, N pulse number, low setting value
+Example: encoder 2500 lines, to travel,	12.5 turn, then set Pn120=12, Pn121=5000.
+&
+Pn128;0;Internal position instruction 0 running speed;0-3000;100;r/min;P
+&
+Pn129;0;Internal position instruction 1 running speed;0-3000;100;r/min;P
+&
+Pn130;0;Internal position instruction 2 running speed;0-3000;100;r/min;P
+&
+Pn131;0;Internal position instruction 3 running speed;0-3000;100;r/min;P
+When the internal position instruction N is executed, the maximum speed at which the motor can run is defined.
+&
+Pn132;0;Torque / speed control switching to position control;0-1;0;;P	
+In dual mode control, when the control mode is switched from torque or speed mode to position control (Pn002=3 or 4), to avoid severe mechanical shock,	the
+switch should be switched at a lower speed. Set the condition for switching:
+[Setting value;Function]
+0:(zerospeed)	
+1:Decelerate to zero	
+&
+Pn133;0;Torque / speed control switching to position control deceleration time;5-10000;100;ms;P
+Pn132=1, when the Cmode signal is valid, indicating that the control mode is switched from torque or speed control to position control, the motor is decelerated to zero first and then switched to position control mode. See the appendix B for specific timing.
+&
+Pn134;0;Fixed length displacement direction;0-1;0;;P
+When the fixed length is moved,	the direction of the motor rotation must
+be determined before the SigIn:Pdistance is triggered:
+0:according to the current motor speed to determine the fixed length, displacement, rotation direction, The current rate is more than 0, fixed length displacement forward (CCW); the speed of < O, the fixed length displacement inversion (CW).
+1:according to the current motor speed to determine the fixed length, displacement, rotation direction. The speed of >0, the fixed length displacement forward (CCW); the current rate is less than 0, fixed length displacement inversion (CW).
+&
+Pn135;0;Fixed length shift height;0-9999;0;Ten thousand;P
+&
+Pn136;0;Fixed length shift low;0-9999;100;individual;P
+When the Sigln:Pdistance is triggered, the motor shaft will rotate at a distance of Pn135*10000+Pn136 (pulse). The moving direction of the motor is determined by Pn134.
+&
+Pn137;0;Maximum running speed at fixed length;10-5000;200;r/min/P
+The maximum speed at which the motor is allowed to run during a fixed length.
+&
+Pn138;0;Fixed length locking release;0-1;1;;P
+After the fixed length shift is completed, the motor is in a fixed length locking state, and is the normal response position instruction.	There are two ways of releasing the motor:
+0: no need to lock the signal, after the completion of fixed displacement, immediate response to position instructions.
+1: must wait for the input port signal, the SigIn:Punlock signal is effective, only then can respond the position instruction.
+&
+Pn139;0;Vibration suppression ratio at stop;10-100;100;%;P
+&
+Pn140;0;The wait time is suppressed when the vibration is stopped;0-30000;300;ms;P
+&
+Pn141;0;Vibration suppression conditions at stop;0-10000;10;pulse;P
+The servo gain increases to a considerable extent, although vibration does not occur when moving, but vibration may occur after the stop. This function works only at stop time and suppresses vibration by reducing servo gain.	 
+Starting from the position command is stopped, when the impulse is lower than that of the Pn141 mountains left the set value, waiting for Pn140 time, internal servo gain attenuation. If the attenuation ratio is above 50%, if the low value is set, the vibration may also be reduced and vibration will occur
+## Speed control parametee
+&
+Pn146;2;Speed command plus deceleration mode;0-2;1;;S
+[Setting value;Function]
+0: NO Acceleration and deceleration
+1: S curve acceleration and deceleration
+2: Linear acceleration and deceleration
+This parameter should be set to 0 in the speed control mode with an external position loop.
+&
+Pn147;2;Speed command, S curve, acceleration and deceleration time constant Ts:5-1500;80;ms;S
+&
+Pn148;2;Speed command, S curve, acceleration time constant, Ta;5-10000;80;ms;S
+&
+Pn149;2;Speed command, S curve, deceleration time constant Td;5-10000;80;ms;S
+In the speed control mode, the acceleration and deceleration time of the speed.
 
