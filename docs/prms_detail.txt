@@ -648,5 +648,136 @@ Pn147;2;Speed command, S curve, acceleration and deceleration time constant Ts:5
 Pn148;2;Speed command, S curve, acceleration time constant, Ta;5-10000;80;ms;S
 &
 Pn149;2;Speed command, S curve, deceleration time constant Td;5-10000;80;ms;S
-In the speed control mode, the acceleration and deceleration time of the speed.
+In the speed control mode, the acceleration and deceleration time of the speed command can be set to smoothly start and stop the servo motor. 
+Ta: acceleration time: time from 0 r/mtin to rated speed. For example; the servo motor rated speed 3000 r/min, if the at time is 3S, then the speed from 0 r/min to 1000 r/min is 1S.
+Td: deceleration time: reduced from rated speed to 0 r/min time 
+Ts: arc part time
+&
+Pn150;2;Linear acceleration time constant;5-30000;80;ms;S
+&
+Pn151;2;Linear deceleration time constant;5-30000;80;ms;S
+The acceleration time constant is defined as the time that the speed command rises from zero to the rated speed.
+&
+Pn152;1;Speed detection filter time constant;1-380;1;0.1 ms;All
+The greater the parameter value, the smoother the speed is detected, but the slower the rate response. Too large to cause oscillations; too small to cause noise.
+&
+Pn153;0;Speed regulator proportional gain 1;1-2000;80;Hz;All
+&
+Pni54;0;Speed regulator integration time constant 1;1-5000;150;0.1 ms;All
+&
+Pn155;0;Speed regulator proportional gain 2;1-2000;80;Hz;All
+&
+Pn156;0;Speed regulator integration time constant 2;1-5000;150;0.1 ms;All
+The gain of the speed loop controller directly determines the response bandwidth of the speed control loop, and increases the speed loop gain when the mechanical system does not generate vibration or noise, and the speed response is accelerated.
+The integral time constant is used to adjust the compensation speed of steady state error, reduce parameter value, reduce speed control error and increase rigidity. Too small,	easy to cause vibration and noise.
+&
+Pn157;1;Simulated speed, instruction smoothing,	filtering time;1-500;1;0.1 ms;S
+The larger the set value, the slower the input analog response speed is, which is beneficial to reduce the high-frequency noise interference. The smaller the set, the faster the response rate, but the interference noise will become larger.
+&
+Pn158;0;Analog speed command gain;1-1500;300;r/min /V;S
+The proportional relationship between analog speed, command input and actual motor speed. Voltage input range -10-10V. Formula: speed = input voltage*Pn158. For example, when the input voltage is 10V, if it is set to 300, the corresponding speed is 10*300=3000 r/min.
+&
+Pn159;0;Analog speed shift adjustment;-5000 5000;0;mV;All
+The analog input may have an offset that can be compensated by this parameter.
+Automatically adjust the offset to perform Fn008 operations.
+Manually adjust the offset step as follows:
+1:the external 0 potential access analog input port
+2:set this parameter to 0 and observethe value displayed by the Dn17 in the monitor mode.
+3:if the observation value is not 0, input negative observation value to this parameter, then can realize the adjustment  (pay attention to voltage unit conversion relation).
+Example: Dn17=1.12 V, Pn159, enter -1120 mV.
+&
 
+Pn160;0;Analog speed direction;0-1;0;;S
+[Setting value;Function]
+0:Positive voltage forward (CCW), negative voltage reversal (CW)	
+1:Negative voltage forward (CCW), positive voltage inversion (CW)	
+&
+Pn161;0;Analog speed command force zero interval upper limit;0-1000;0;10 mv;S
+&
+Pnl62;0;Analog speed command forced zero interval lower bound;-1000-0;0;10 mV;S
+When the input speed command is between the lower limit and the upper limit, the input command is forced to 0 V.
+At this point the input voltage is the input voltage adjusted by the Pn159 offset.
+Through the setting of the upper and lower limits, the input instructions can be changed into unipolar and bipolar instructions. Example: an upper limit of 0, a lower limit of -1000, equivalent to the input instruction range of 0-10 V, for the positive speed command.
+&
+Pn163;0;Zero speed clamping lock mode;0-1;0;;S
+0: when locking, clamping mode is the position loop control, the interventionof the internal loop control, through the Pn167 set gain.
+1: when locking, clamping method is speed loop control, speed command is 0, the position may be changed because of external force.
+&
+Pn164;0;Zero speed clamping trigger mode;0-1;0;;S
+[Setting value;Function]
+0:SigIn port ZeroLock is ON.
+1:The speed command is triggered when it is lower than the Pn165 parameter.
+&
+Pn165;0;Zero speed clamping level;0-200;6;r/min;S
+The motor shaft is locked when the Pn164 is set to 1 and the speed command is lower than the parameter value. Example: this parameter is set to 10 r/min. If the analog speed command is in the range of -10 r/min-10 r/min, the deceleration clamp is used to prevent the analog speed command from drifting near zero, resulting in the instability of the motor shaft.
+&
+Pn166;0;Zero speed clamping deceleration time;5-10000;50;ms;S
+After the zero speed clamp is triggered, decelerate immediatly to zero at the deceleration time and then lock.
+&
+Pn167;0;internal position regulator gain;1-2000;100;1/S;All
+&
+Pn168;0;Speed command source selection;0-2;0;;S
+Optional optional speed command source in speed control mode.	
+[setting value;Function]
+0: External analog speed command + internal speed 2-8	
+1: Internal speed  -8
+2: Motion controller analog voltage command	
+&
+Pn169;0;Internal speed command 1;-5000-5000;0; r/min;S
+&
+Pn170;0;Internal speed command 2;-5000-5000;0; r/min;S
+&
+Pn171;0;Internal speed command 3;-5000-5000;0; r/min;S
+&
+Pn172;0;Internal speed command 4;-5000-5000;0; r/min;S
+&
+Pn173;0;Internal speed command 5;-5000-5000;0; r/min;S
+&
+Pn174;0;Internal speed command 6;-5000-5000;0; r/min;S
+&
+Pn175;0;Internal speed command 7;-5000-5000;0; r/min;S
+&
+Pn176;0;Internal speed command 8;-5000-5000;0; r/min;S
+When the drive control mode is in the speed control mode, the source of the
+speed command is determined by SP1, SP2, SP3 of the input port Sigln:
+[SP3;SP2;SP1;Speed command]
+0;0;0;Internal speed 1 / external analog speed command (determined by Pn168)
+0;0;1;Internal speed 2
+0;1;0;Internal speed 3
+0;1;1;Internal speed 4
+1;0;0;Internal speed 5
+1;0;1;Internal speed 6
+1;1;0;Internal speed 7
+1;1;1;Internal speed 8
+Note 1: 0 indicates OFF, and 1 stands for ON.
+Note 2: if the SigIn port does not specify SP3, SP2, and SP1 functions, the default is the OFF state.
+&
+Pn177;0;JOG speed;0-5000;200;r/min;S
+&
+Pn178;2;JOG Acceleration time;5-10000;100;ms;S
+&
+Pn179;2;JOG Deceleration time;5-10000;100;ms;S
+When inching test run, the speed of motor operation and the time of acceleration and deceleration can be set.
+&
+Pn182;0;Speed loop PDFF control factor;0-100;100;;PS
+This parameter determines the control structure of the speed loop.
+Pn182=100, for the PI control structure; Pn182=0, for the I-P control.
+&
+Pn183;0;Speed feedback compensation;0-100;0;%;PS
+The feedback speed is compensated, and the greater the compensation value is, the more noise the motor will make.
+## Torque control parameter
+&
+Pn186;0;Torque command acceleration and decelaration mode;0-1;0;;T
+[Setting value;Function]
+0: Do not use torque command to speed up and down
+1: Using torque command, linear acceleration and deceleration
+&
+Pn187;1;Torque command linear acceleration and deceleration time constant;1-30000;1;ms;T
+The time constant is defined as the time that the torque command rises from zero straight to the nominal torque.
+&
+Pn188;1;Simulated torque command smoothing filtering time;1-500;5;0.1 ms;T
+The larger the set value, the slower the input analog response speed is, which is beneficial to reduce the high-frequency noise interference. The smaller the set, the faster the response rate, but the interference noise will become larger.
+&
+Pn189;0;Analog torque command gain;1-300;30;%/V;T
+The proportional relationship between the analog torque command input and the actual output torque of the motor. Voltage input range -10-10V. The default input voltage is 10V, and the motor reaches 3 times the rated torque, i.e., Y=KX=30X, K=30.
+&
