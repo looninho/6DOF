@@ -781,3 +781,163 @@ The larger the set value, the slower the input analog response speed is, which i
 Pn189;0;Analog torque command gain;1-300;30;%/V;T
 The proportional relationship between the analog torque command input and the actual output torque of the motor. Voltage input range -10-10V. The default input voltage is 10V, and the motor reaches 3 times the rated torque, i.e., Y=KX=30X, K=30.
 &
+Pn190;0;Analog torque command offset adjustment;-1500-1500;0;mV;T
+Adjustment mode reference "analog speed command offset adjustment"
+&
+Pn191n;0;Analog torque direction;0-1;0;;T
+[Setting value;Function]
+0: Positive voltage forward (CCW), negative voltage reversal (CW)
+1: Negative voltage forward (CCW), positive voltage inversion (CW)
+&
+Pn192;0;Torque Q shaft regulator proportional gain 1;5-2000;100;%;All
+&
+Pn193;0;Torque Q axis regulator integration time constant 1;5-2000;100;%;All
+&
+Pn194;0;Torque Q shaft regulator proportional gain 2;5-2000;100;%;All
+&
+Pn195;0;Torque Q axis regulator integration time constant 2;5-2000;100;%;All
+Increasing the proportional gain can speed up the Q axis current response.
+Reducing the integral time constant can reduce the Q axis current control error.
+&
+Pn196;0;Torque instruction filtering time constant 1;1-5000;40;0.01 ms;All
+&
+Pn197;0;Torque instruction filtering time constant 2;1-5000;40;0.01 ms;All
+The mechanical vibration can be suppressed, the greater the set value, the better the effect, resulting in slower response to the meeting, may cause oscillation: the smaller the set value,	the faster the response, but limited by mechanical conditions.
+&
+Pn198;0;Limiting speed during torque control;0-4500;2500;r/min;T
+In torque control, the motor speed is limited within this parameter range. It can prevent overspeed during light load.	When speeding occurs, the intervention speed control reduces the actual torque, but the actual speed will be slightly error.
+&
+Pn199;0;Torque control, limited speed, source selection;0-2;0;;T
+[Setting value;Function]
+0: Subject to parameter Pn198 limit.
+1: Subject to the internal speed command 1-8 limit.
+2: If Pn204=1, that is,	all torque commands originate from the internal torque command, the speed can be limited by analog voltage, speed,	and instruction.
+All of these speed limits are positive and negative, and multiple speed limits occur, subject to minimal speed.
+If this parameter is set to 1 and limited by the internal speed command, the SP1, SP2, and SP3 determine the limited speed value:
+0 stands for OFF, and 1 means ON.
+[SP3;SP2;SP1]
+0;0;0;Internal speed 1
+0;0;1;Internal speed 2
+0;1;0;Internal speed 3
+0;1;1;Internal speed 4
+1;0;0;Internal speed 5
+1;0;1;internal speed 6
+1;1;0;Internal speed 7
+1;1;1;internal speed 8
+Even if the parameter settings exceed the maximum speed allowed by the system, the actual speed will be limited to the maximum speed.
+&
+Pn200;0;Internal torque 1;-300-300;0;%;T
+&
+Pn201;0;Internal torque 2;-300-300;0;%;T
+&
+Pn202;0;Internal torque 3;-300-300;0;%;T
+&
+Pn203;0;Internal torque 4;-300-300;0;%;T
+When selecting the internal torque control mode, the TR1 TR2 using the input port SigIn can select 4 torque commands:
+[TR2;TR1;Torque command]
+0;0;Internal torque 1 or external analog torque instruction	(determined by Pn204)
+0;1;Internal torque 2
+1;0;Internal torque 3
+1;1;internal torque 4
+Note 1: 0 indicates OFF, and 1 stands for ON
+Note 2: if the SigIn port does not use the specified TR2, TR1 function, the default is the OFF state.
+&
+Pn204;0;Torque command source;0-2;0;;T
+[Setting value;Function]
+0: External analog torque command.
+1: Internal torque 1.
+2: Motion controller analog voltage command.&
+&
+Pn205;0;Torque D axis regulator, proportional gain;5-2000;100;%;All
+&
+Pn206;0;Torque D axis regulator, integral time constant;5-2000;100;%;All
+In space vector modulation, the proportional gain and integral time constant of the regulator of the torque D axis.
+&
+Pn207;0;Speed feeback adjustment factor;1-3000;100;;T
+In torque control, the motor speed is outside the defined speed range, and:the intervention speed feedback is applied to reduce the actual torque, so that the speed is returned to the limited speed range. Parameter setting is smaller, the greater the amount of feedback, adjust more quickly, the difference with the speed limit is small, but too small may cause motor jitter: parameter setting is too large, adjust more slowly, there may have been no limiting speed. The actual speed will he slightly higher than the specified speed.
+&
+Pn208;0;1Tracking torque instruction to determine range of error 1;0-300;5;%;T
+&
+Pn209;0;2Tracking torque instruction to determine range of error 2;0-300;2;%;T
+To make the SigOut port TCMOD reach signal output valid, the following conditions must be met:
+Condition 1: the torque instructions set by the upper computer must be within 1 of the error range. Example: the input torque command 80%, Pn208 is set to 5%, the driver of the internal torque input speed plus and deceleration operations, when the output torque calculation instructions in the 75%-85% range, the condition 1 is met.
+Condition 2: the difference between the actual motor torque and the input torque command is within 2 of the error range.
+&
+Pn210;0;Decision time for speed limited output;0-2000;15;ms;T
+In the torque control mode, when the motor speed exceeds the maximum speed limit value and the speed limiting function is continued within the decision time, the SPL function signal of the SigOut port is output ON to reduce the frequent inversion of the signal.
+## extended control parameter
+&
+Pn216;1;Absolute encoder usage selection;0-1;0;;All
+[Setting value;Function]
+0: Single loop absolute encoder
+1: Multi loop absolute encoder
+2: Motion controller analog voltage command.
+When there is no external battery, the encoder cannot save multi circle information. This parameter should be set to 0.
+&
+Pn217;0;Absolute encoder output line;16-16384;2500;line;All
+A pulse transmitted from the outside of the servo unit. The higher the output line, the higher the maximum frequency (Max=1.6 Mhz) of the A and B orthogonal pulse signals, and the higher the requirements for the pulse receiver circuit of the host computer. A poor reception circuit will suffer from pulse missing.
+By default, Pn217=2500, that is, the motor rotates one turn, the servo unit outputs 2500*4=10000 pulses.
+&
+Pn218;0;Absolute position data transfer mode for absolute encoder;0-1;0;;All
+When Pn216 is set to 1, that the use of multi ring absolute encoder data, and the absolute encoder is equipped with batteries, multi turn absolute position information at this time will output the correct; if Pn216 is set to 0, the output of the multi ring position information for 0. See the use of absolute servo units in chapter tenth.
+[Setting value;Function]
+0: The incremental mode outputs the absolute position information of the circle and the absolute position information of the single circle
+1: Digital encoding outputs absolute position information and single loop absolute position information
+&
+Pn219;0;Multi turn overflow detection for absolute encoder;0-1;1;;All
+When used as a multi loop absolute encoder, if the motor is always running in single direction, it may lead to multi circle data overflow. This parameter can be set to turn off the overflow alarm.
+[Setting value;Function]
+0: Multi circle overflow alarm not detected
+1: Multi circle overflow alarm detection
+&
+Pn234;0;Maximum pulse command frequency;20-2000;550;kHz;P
+When the instruction pulse frequency exceeds the set value, the driver sends out an alarm.
+&
+Pn235;0;Pulse instruction digital filtering time;0-255;0;100 ms;P
+The input instruction pulse is filtered digitally to filter the noise on the signal line.
+The greater the setup time, the lower the maximum pulse frequency. System defaults, allowing maximum 550 kHz frequencies to be received. Filter time must be left a certain margin,	otherwise there may be lost pulse phenomenon.
+&
+Pn236;0;Absolute encoder, forward soft forbidden, multi circle value;0-32000;0;circle;All
+&
+Pn237;0;Absolute encoder, forward soft forbidden, single coil value;0-10000;0;0.0001 circle;All
+&
+Pn238;0;Absolute encoder, reverse soft forbidden, multi circle value;0-32000;0;circle;All
+&
+Pn239;0;Absolute encoder, reverse soft inhibit,	single coil value;0-10000;0;0.0001 circle;All
+For servo motors with absolute encoders, use the encoder's multi turn function (Pn216=1) and use software driver disable function. The soft disable function is equivalent to a drive disable function triggered by an external port (CCWL, CWL) that can be used in conjunction with the P007 and Pn077 parameters.
+When the parameter is set to 0	(default), the soft disable function is invalid. Otherwise, when the number of turns of the motor reaches the set value, the soft disable function will be triggered. Example: Pn236=100, Pn237=5000, triggers the drive disable function when the motor is rotated forward beyond the 100+5000*0.0001=100.5 loop.
+&
+Pn257;0;Load inertia ratio;0-100.00;1.00;times;PS
+Load torque ratio = (11 of motor shaft translation) (/ rotor inertia (Jm)). When
+leaving the factory, the servo motor is assumed to have a double load inertia state.
+&
+Pn258;0;Gain adjustment mode;0-1;0;;PS
+[Setting value;Function]
+0: Manual gain adjustment.	
+1: For automatic gain adjustment, see the chapter on "operation and adjustment".	
+&
+Pn259;0;Rigid grade selection;0-20;5;;PS
+The higher the rigidity, the faster the servo response, but the higher rigidity will cause the motor vibration. The method of setting is detailed in the chapter "operation and adjustment".
+&
+Pn260;0;Real-time estimation method of inertia;0-1;0;;All
+[Setting value;Function]
+0: Off-line inertia estimation.	Identification of inertia by Fn018 operation.	
+1: On-line inertia estimation.	When the motor is running, the real-time estimation is made and the load inertia ratio is checked by Dn030.
+&
+Pn263;2;inertia estimation acceleration and deceleration time;20-500;80;ms;All
+&
+Pn2644;2;inertia estimation allows maximum speed;150-1000;400;r/min;All
+&
+Pn265;2;Inertia estimation pause interval;0-10000;500;ms;All
+&
+Pn266;2;Inertia estimation; inertia ratio; prediction value;1.00-20.00;3.00;time;All
+See system reliability identification in chapter "operation and adjustment".
+&
+Pn267;1;Rated torque of motor;0-32000;0;0.1 Nm;All
+&
+Pn268;1;Maximum output torque of motor;0-32000;0;0.1 Nm;All
+&
+Pn269;1;Jm Motor rotor moment of inertia Jm;0-32000;0;kg.N-2.10-4;All
+&
+Pn270;1;Maximum motor speed;80-5500;80;r/min;All
+Must he set according to motor nameplate parameters. The wrong parameter setting will affect the motor performance, resulting in abnormal rotation of the motor.	By default, drive the internal parameters of the drive.
