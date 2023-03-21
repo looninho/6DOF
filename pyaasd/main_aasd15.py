@@ -13,7 +13,7 @@ from serial.tools.list_ports import comports
 from pymodbus.framer.rtu_framer import ModbusRtuFramer
 from pymodbus.client import ModbusSerialClient as ModbusClient
 
-Form, Base = loadUiType('aasd15.ui')
+Form, Base = loadUiType('ui/aasd15.ui')
 class MainWindow(Form, Base):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)

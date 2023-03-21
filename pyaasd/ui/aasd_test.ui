@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>563</width>
+    <height>356</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QTabWidget" name="controller">
+     <property name="currentIndex">
+      <number>6</number>
+     </property>
+     <widget class="QWidget" name="system_tab">
+      <attribute name="title">
+       <string>System</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="position_tab">
+      <attribute name="title">
+       <string>Position</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="speed_tab">
+      <attribute name="title">
+       <string>Speed</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="torque_tab">
+      <attribute name="title">
+       <string>Torque</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="monitor_tab">
+      <attribute name="title">
+       <string>Monitor</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="alarm_tab">
+      <attribute name="title">
+       <string>Alarm</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="comm_tab">
+      <attribute name="title">
+       <string>Comm</string>
+      </attribute>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

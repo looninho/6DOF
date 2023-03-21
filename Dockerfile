@@ -29,7 +29,8 @@ RUN apt update && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install PySide6
+RUN pip install PySide6 && \
+    pip install pyqtgraph
 
 CMD ["/bin/bash"]
 

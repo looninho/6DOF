@@ -29,7 +29,7 @@ def read_holding_register(mb_addr, slave=slave):
 def write_register(mb_addr, val, slave=slave):
     client.write_register(mb_addr, val, slave=slave)
 
-# write motor type, check it is 4 for 8ST_M02430
+# write motor type, check it is 4 for 80ST-M02430
 Pn, val = 1, 4
 motor_type = read_holding_register(Pn)
 print(f"motor type: {motor_type}. (4 for 80st_m02430)")
@@ -116,7 +116,7 @@ else:
     print("\nDriver is ready.")
 
 ############################################
-# # INTERNAL POSITION CONTOL
+# # INTERNAL POSITION CONTROL
 ############################################
 ## position control mode settings
 Pn, val = 101, 3 # (Gn2, Gn1) = (1, 1)
@@ -140,7 +140,7 @@ if pos_cmd_src != val:
     print(f"pos_cmd_src was {pos_cmd_src}. Now set to {val}...")
     write_register(Pn, val)
 
-## preset the motor shaft to the position 1.5 circle
+## preset the motor shaft to the position 1.5 CW
 Pn, val = 120, 1 & 0xffff # x 10 000 pulse. [-9999~9999]
 p_hight =  read_holding_register(Pn)
 print(f"pulse number high: {p_hight}. (x 10 000 pulse)")
@@ -159,6 +159,7 @@ if p_low != val:
 client.write_register(3, 1, slave=slave)
 
 ## trigger on the position
+# TODO: change only the BIT10
 Pn, bit_pos = 71, 10
 val =  read_holding_register(Pn)
 reg2_enable = bin(val).replace('0b', '').zfill(15)
@@ -179,6 +180,21 @@ for elm in list_reg2:
 
 val = int(reg2_enable, 2)
 write_register(Pn, val)
+
+## preset the motor shaft to the position 1.5 VCW
+Pn, val = 120, -1 & 0xffff # x 10 000 pulse. [-9999~9999]
+p_hight =  read_holding_register(Pn)
+print(f"pulse number high: {p_hight}. (x 10 000 pulse)")
+if p_hight != val:
+    print(f"pulse number high was {p_hight}. Now set to {val}...")
+    write_register(Pn, val)
+
+Pn, val = 121, -5000 & 0xffff # x 10 000 pulse. [-9999~9999]
+p_low =  read_holding_register(Pn)
+print(f"pulse number low: {p_low}. (x 10 000 pulse)")
+if p_low != val:
+    print(f"pulse number low was {p_low}. Now set to {val}...")
+    write_register(Pn, val)
 
 ## disable the motor
 client.write_register(3, 0, slave=slave)
