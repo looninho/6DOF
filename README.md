@@ -1,145 +1,131 @@
-# AASD-15 driver for 6DOF motion simulator
-## _Using RS485 rtu protocol_
+# Setup python environment
+1) install python with Microsoft Store
+2) create your workspace folder e.g:
+    `mkdir -p d:\workspace\6dof`
+3) then cd to this folder and create your python environment:
+    `d: && cd  workspace\6dof`
+    `python -m venv --system-site-packages 6dof-env`
+    `6dof-env\Scripts\activate`
+    `pip install -U pymodbus pyserial`
 
-[![N|Solid](https://cldup.com/dTxpPi9lDf.thumb.png)](https://nodesource.com/products/nsolid)
-
-[![Build Status](https://travis-ci.org/joemccann/dillinger.svg?branch=master)](https://travis-ci.org/joemccann/dillinger)
-
-WIP: implement functions for:
-
-- Parameter settings mode: Pn000~Pn236:
-  - system control parameters: Pn00~Pn095 (WIP)
-  - position control parameter: Pn096~Pn145 (TODO)
-  - speed control parameters: Pn146~Pn185 (TODO)
-  - torque control parameters: Pn186~Pn215 (TODO)
-  - extended control parameter: Pn216~Pn236 (TODO)
-- Monitoring mode: Dn000~Dn028 (TODO)
-- Alarm reading mode: Fn000~Fn??? (TODO)
-
-## modbus communication address
-
-- 0~236 for Pn000~Pn236
-- 356~365 for Fn000~Fn???
-- 368~396 for Dn000~Dn028
-
-## Installation: using Docker
-
-Configuration: Host is Windows 10 with Docker Desktop, Ubuntu WSL, XLaunch (Xming) and usbipd installed. 
-
-### install usbipd-win
-
-Follow instructions [here](https://github.com/dorssel/usbipd-win) to install `usbipd-win` software for sharing locally connected USB devices to other machines, including WSL 2
-
-### install X server for Windows
-Install Xming X Server for Windows [here](https://sourceforge.net/projects/xming/files/Xming/6.9.0.31/Xming-6-9-0-31-setup.exe/download)
-
-### install usbip in Ubuntu WSL
-
-Ubuntu WSL is the bridge between the host (Windows 10) and the docker container where we'll develop.
-
-```sh
-sudo apt update
-sudo apt install linux-tools-virtual hwdata
-sudo update-alternatives --install /usr/local/bin/usbip usbip `ls /usr/lib/linux-tools/*/usbip | tail -n1` 20
+# System settings
+In your python console, identify the COM port for your RS485 adaptator:
 ```
-### attach the rs485 usb device to WSL
-
-Check that Docker Desktop and WSL are running:
-```
-wsl -l -v
-``` 
-Should print:
-```
-  NAME                   STATE           VERSION
-* docker-desktop-data    Running         2
-  docker-desktop         Running         2
-  Ubuntu                 Running         2
-``` 
-
-In Windows terminal, list all usb devices attached: `usbipd list`.
-
-Attach the COM port where the RS485 usb device is plugged: `usbipd wsl attach -d Ubuntu -b <BUSID>`. You can check in Ubuntu WSL with `lsusb`.
-
-### Create the development environment with Docker
-
-#### Build docker image: 
-
-cd to this root dir where is the `Dockerfile` and build:
-```sh
-docker build --tag=modbus6dof:dev .
-```
-
-#### Run the container
-
-Check the vEthernet(WSL) IP address in Windows with `ipconfig` and check the Ubuntu WSL IP with `cat /proc/net/fib_trie`. By using this [website](https://tehnoblog.org/ip-tools/ip-address-in-cidr-range/) select an IP address which matches CIDR (e.g. 172.24.245.10 for this tuto) then run the container:
-```sh
-docker run --ip 172.24.245.10 -it --rm --privileged -e DISPLAY=host.docker.internal:0.0 -v "e:\dev\instrumentation\hardware\6DOF":/6dof:rw --name=6dof_dev modbus6dof:dev bash
-```
-
-### Test installation
-
-run `XLaunch` from Windows host with default params
-
-run the test app in the container:
-```sh
-cd /6dof
-python main_assd15.py
-```
-
-### finish
-
-detach usb device physically or use this command: `usbipd wsl detach -b <BUSID>` in Windows terminal.
-## Quick start (TODO)
-
-## Basic test with `pymodbus`
-
-The default serial port settings for RS485 modbus rtu is `8-bits` data, `Odd` parity, `1-bit` stop, `115200` baudrate.
-
-Before using this module, you have to change the Pn065 parameter to `1` for `motor1`, `2` for `motor2`, etc. This is the site address for communication.
-
-**Note:** With RS485 you can connect all your 6 AASD comports to one USB-RS485 adaptator using 2 `120 Ohm` terminal resistors.
-1) list your COM ports to find which COM port is connected your usb-rs485 adaptator:
-```sh
 from serial.tools.list_ports import comports
-list_comm = comports()
-for port in list_comm:
-    for m in port.__dict_keys():
+for port in comports():
+    for m in port.__dict__.keys():
         print(m, ": ", port.__getattribute__(m))
     print('-'*79)
 ```
-2) define the motor identity and the COM port:
-```sh
-motor_id = 1
-port = 'COM7' # change here for your actual COM port
+
+Prior to communicate with the driver, we have to check "by hand" the slave parameter.
+Default factor settings is for `RS485` (Pn064) communication with `slave=1`. This is the modbus client number to identify your driver `1` for motor1, etc. You can check with:
+  - Pn065=1 # slave number
 ```
-3) setup the modbus rtu client for your usb-rs485 adaptator
-```sh
-from pymodbus.client.sync import ModbusSerialClient as ModbusClient
-client = ModbusClient(
-                        method='rtu', 
-                        port=port, 
-                        stopbits=1, 
-                        bytesize=8, 
-                        parity='O', 
-                        baudrate=115200, 
-                        strict=False
-                    )
+slave = 1
 ```
-4) goto editing mode if not yet:
-```sh
-Pn, nbyte = 0, 1
-rr = client.read_holding_registers(Pn, nbyte, unit=motor_id)
-if rr.getRegister(0) != 1: # change to editing mode
-    client.write_register(Pn, 1, unit=motor_id)
+Assuming that your COM port is `COM3` and other communication parameters are defaults to `baud=115200`, `bytesize=8`, `parity=Odd`, `stopbits=1`. see Pn066 and Pn067. We define the client to communicate:
 ```
-5) set the driver for 80st-m02430 motor:
-```sh
-Pn, value = 1, 4
-client.write_register(Pn, value, unit=motor_id) # motor code for 80st-m02430 is 4
+from pymodbus.framer.rtu_framer import ModbusRtuFramer
+from pymodbus.client import ModbusSerialClient
+
+client=ModbusSerialClient(port='COM3',
+                          framer=ModbusRtuFramer,
+                          baudrate=115200,
+                          bytesize=8,
+                          parity="O",
+                          stopbits=1,
+                          strict=False
+                          )
 ```
-6) **WARNING** for test only: enable the driver when power on:
-```sh
-Pn, value = 3, 1
-client.write_register(Pn, value, unit=motor_id)
+## System settings for internal control
+### Simplifying
+We define some function to simplify:
 ```
-7)
+def read_holding_register(mb_addr, slave=slave):
+    rr = client.read_holding_registers(mb_addr, 1, slave=slave)
+    return rr.getRegister(0)
+
+def write_register(mb_addr, val, slave=slave):
+    client.write_register(mb_addr, val, slave=slave)
+
+def read_16bits(val):
+    return bin(val).replace('0b', '').zfill(15)
+
+def set_bitN_to(Pn, bit_pos, value=1):
+    val =  read_holding_register(Pn) # int number
+    register = read_16bits(val) # bin format
+    list_reg = list(register) # convert to list to change bit10
+    list_reg[15-bit_pos-1]=str(value) # set bit10 to 1
+    reg=''
+    for elm in list_reg:
+        reg += elm
+    val = int(reg, 2) # re-convert to int
+    write_register(Pn, val)
+    return val
+
+def trigger(Pn, bit_pos, raising=True):
+    val =  read_holding_register(Pn)
+    register = read_16bits(val)
+    list_reg = list(register)
+    if raising:
+        if list_reg[15-bit_pos-1]=='1':
+            change_bitN(Pn, bit_pos, 0)
+        else:
+            change_bitN(Pn, bit_pos, 1)
+    else:
+        if list_reg[15-bit_pos-1]=='0':
+            change_bitN(Pn, bit_pos, 1)
+        else:
+            change_bitN(Pn, bit_pos, 0)
+    return 0
+
+```
+
+### System settings
+Internal control is RS485 unlike external or analog control.
+Define your motor type number, see your motor's documentation, e.g for 80ST-M02430 the motor number is `4`:
+```
+# set motor number
+Pn, val = 1, 4 # 4 is 80ST-M02430 motor
+write_register(Pn, val)
+
+# change the SigIn Ptrigger BIT10=1 for internal control
+Pn, bit_pos = 69, 10
+set_bitN_to(Pn, bit_pos, 1)
+
+# select internal position control mode
+Pn, val = 2, 2
+write_register(Pn, val)
+```
+### position settings
+```
+# set electronic gear ratio to 3 for cell number 4 (Pn101)
+Pn, val = 101, 3
+write_register(Pn, val)
+
+# select S-curve filter for accel & decel mode
+Pn, val = 109, 2
+write_register(Pn, val)
+
+# select cpntrol source is internal
+Pn, val = 117, 1 
+write_register(Pn, val)
+```
+
+## Move motor
+```
+# preset the motor shaft to the position 1.5 CW
+Pn, val = 120, 1 & 0xffff # x 10 000 pulse. [-9999~9999]
+write_register(Pn, val)
+
+# enable the motor
+write_register(3, 1)
+
+# each time we trigger, the motor wil turn 1.5 CW
+Pn, bit_pos = 71, 10
+trigger(Pn, bit_pos, raising=True)
+
+# disable the motor
+write_register(3, 0)
+```

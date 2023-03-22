@@ -28,6 +28,37 @@ def read_holding_register(mb_addr, slave=slave):
 
 def write_register(mb_addr, val, slave=slave):
     client.write_register(mb_addr, val, slave=slave)
+    
+def read_16bits(val):
+    return bin(val).replace('0b', '').zfill(15)
+
+def change_bitN(Pn, bit_pos, value=1):
+    val =  read_holding_register(Pn) # int number
+    register = read_16bits(val) # bin format
+    list_reg = list(register) # convert to list to change bit10
+    list_reg[15-bit_pos-1]=str(value) # set bit10 to 1
+    reg=''
+    for elm in list_reg:
+        reg += elm
+    val = int(reg, 2) # re-convert to int
+    write_register(Pn, val)
+    return val
+
+def trigger(Pn, bit_pos, raising=True):
+    val =  read_holding_register(Pn)
+    register = read_16bits(val)
+    list_reg = list(register)
+    if raising:
+        if list_reg[15-bit_pos-1]=='1':
+            change_bitN(Pn, bit_pos, 0)
+        else:
+            change_bitN(Pn, bit_pos, 1)
+    else:
+        if list_reg[15-bit_pos-1]=='0':
+            change_bitN(Pn, bit_pos, 1)
+        else:
+            change_bitN(Pn, bit_pos, 0)
+    return 0
 
 # write motor type, check it is 4 for 80ST-M02430
 Pn, val = 1, 4

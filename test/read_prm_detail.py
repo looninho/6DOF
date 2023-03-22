@@ -28,7 +28,7 @@ class PrmsDetail:
         prms_detail={}
         for line in self.Lines:
             if line.startswith('## '):
-                prms_detail[line.strip("##")] = []
+                prms_detail[line.strip("##").strip()] = []
             if line.startswith('& Pn'):
                 temp = line.split('& ')[-1].split(";")
                 try:
