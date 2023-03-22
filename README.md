@@ -108,7 +108,7 @@ write_register(Pn, val)
 Pn, val = 109, 2
 write_register(Pn, val)
 
-# select cpntrol source is internal
+# select control source is internal
 Pn, val = 117, 1 
 write_register(Pn, val)
 ```
@@ -116,7 +116,9 @@ write_register(Pn, val)
 ## Move motor
 ```
 # preset the motor shaft to the position 1.5 CW
-Pn, val = 120, 1 & 0xffff # x 10 000 pulse. [-9999~9999]
+Pn, val = 120, 1 & 0xffff # 1 circle
+write_register(Pn, val)
+Pn, val = 121, 5000 & 0xffff # 0.5 circle
 write_register(Pn, val)
 
 # enable the motor
