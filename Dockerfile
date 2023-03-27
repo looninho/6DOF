@@ -32,7 +32,7 @@ RUN apt update && apt upgrade && \
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install PySide6 pyqtgraph pyserial pymodbus
+RUN pip install APScheduler PySide6 pyqtgraph pyserial pymodbus
 
 CMD ["/bin/bash"]
 

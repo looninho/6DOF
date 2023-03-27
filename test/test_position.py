@@ -6,14 +6,14 @@ from pymodbus.framer.rtu_framer import ModbusRtuFramer
 from pymodbus.client import ModbusSerialClient
 
 liste_comm = comports()
-for port in liste_comm:
+for port in comports():
     for m in port.__dict__.keys():
         print(m, ": ", port.__getattribute__(m))
     print('-'*79)
 
 slave = 1
 
-client=ModbusSerialClient(port='/dev/ttyUSB0',
+client=ModbusSerialClient(port="COM7", # /dev/ttyUSB0
                           framer=ModbusRtuFramer,
                           baudrate=115200,
                           bytesize=8,
@@ -28,7 +28,7 @@ def read_holding_register(mb_addr, slave=slave):
 
 def write_register(mb_addr, val, slave=slave):
     client.write_register(mb_addr, val, slave=slave)
-    
+
 def read_16bits(val):
     return bin(val).replace('0b', '').zfill(15)
 

@@ -1,5 +1,5 @@
 # NO.;Name;Range;Unit;Apply
-## system parameter
+## System parameter
 & Pn000;0;Parameter editing and initialization;0-3;1;;All
 [Setting value;function]
 0: Parameter initialization prohibited
@@ -392,7 +392,7 @@ Pn096;;Direct order; Negative command
 & Pn099;0;Pulse electron gear ratio of molecule 2;1-32767;1;;P
 & Pn100;0;Pulse electron gear ratio of molecule 3;1-32767;1;;P
 & Pn101;0;Pulse electron gear ratio of molecule 4;1-32767;1;;P
-& PnIO2;1;The denominator or a pulsed electronic gear ratio;1-32767;1;;P
+& Pn102;1;The denominator or a pulsed electronic gear ratio;1-32767;1;;P
 The molecular N of the electronic gear ratio is determined by GN1, GN2 of the input port SigIn.	Denominator fixing. Molecular selection follows:	
 GN2;GN1;Electronic gear ratio,	molecular N	
 OFF;OFF;Molecule 1	
@@ -406,7 +406,7 @@ When the pulse number of the pulse deviation counter exceeds the net value (i.e.
 When the residual pulse number of the offset counter is lower than the parameter setting value, the output port SigOut: Preach signal is ON, otherwise OFF.
 & Pn106;0;Location positioning complete range setting;0-32767;300;pulse;P
 & Pn107;0;Location positioning complete backlash setting;0-32767;30;pulse;P
-When the residual poise number of the offset counter is	lower than the parameter setting value, the Pnear signal of the output port SigOut is ON, otherwise OFF.
+When the residual pulse number of the offset counter is	lower than the parameter setting value, the Pnear signal of the output port SigOut is ON, otherwise OFF.
 & Pn108;0;Position deviation clearing mode;0-1;1;;P
 Position control, you can use the SigIn's Pclear function to clear the value of the position offset counter. Positional error clearing occurs at:
 [Setting value;Function]
@@ -483,7 +483,7 @@ After the fixed length shift is completed, the motor is in a fixed length lockin
 & Pn141;0;Vibration suppression conditions at stop;0-10000;10;pulse;P
 The servo gain increases to a considerable extent, although vibration does not occur when moving, but vibration may occur after the stop. This function works only at stop time and suppresses vibration by reducing servo gain.	 
 Starting from the position command is stopped, when the impulse is lower than that of the Pn141 mountains left the set value, waiting for Pn140 time, internal servo gain attenuation. If the attenuation ratio is above 50%, if the low value is set, the vibration may also be reduced and vibration will occur
-## Speed control parametee
+## Speed control parameter
 & Pn146;2;Speed command plus deceleration mode;0-2;1;;S
 [Setting value;Function]
 0: NO Acceleration and deceleration
@@ -653,7 +653,7 @@ Condition 1: the torque instructions set by the upper computer must be within 1 
 Condition 2: the difference between the actual motor torque and the input torque command is within 2 of the error range.
 & Pn210;0;Decision time for speed limited output;0-2000;15;ms;T
 In the torque control mode, when the motor speed exceeds the maximum speed limit value and the speed limiting function is continued within the decision time, the SPL function signal of the SigOut port is output ON to reduce the frequent inversion of the signal.
-## extended control parameter
+## Extended control parameter
 & Pn216;1;Absolute encoder usage selection;0-1;0;;All
 [Setting value;Function]
 0: Single loop absolute encoder

@@ -14,7 +14,7 @@
 
 `6dof-env\Scripts\activate`
 
-`pip install -U pymodbus pyserial PySide6 pyqtgraph`
+`pip install -U APScheduler pymodbus pyserial PySide6 pyqtgraph`
 
   
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #-----------------------------------------------------------------------------
 # Name:        sync_pyaasd.py
-# Purpose:     synchronous client driver for communicating with AASD-15A,
+# Purpose:     Serial synchronous client driver for communicating with AASD-15A,
 #              
 #
 # Notes:       
@@ -15,9 +15,14 @@
 #await, write to a Coil and read back
 #await, write to multiple Coils and read back
 
+import os, sys
+this_dir=os.path.dirname(os.path.abspath(__file__))
+# parent_dir=os.path.dirname(this_dir)
+sys.path.insert(1, os.path.join(this_dir, 'lib'))
+
 # from serial.tools.list_ports import comports
-from pymodbus.framer.rtu_framer import ModbusRtuFramer
 from pymodbus.client import ModbusSerialClient
+from pymodbus.framer.rtu_framer import ModbusRtuFramer
 
 # User parameter mode (Pn) operation
 # address 0000H..00ECH or 0..236 (dec): Pn000..Pn236 (read-write)
@@ -51,7 +56,7 @@ class ErrorStatus(Exception):
     pass
 
 class Sync_AASD_15A:
-    """Synchronous AC Servo Driver for AC Servo Motor model 80ST-M02430LB
+    """Serial synchronous AC Servo Driver for AC Servo Motor model 80ST-M02430LB
     """    
     def __init__(self, port:str, framer=ModbusRtuFramer, baudrate=115200, bytesize=8, parity="O", stopbits=1, strict=False):
         self.controller = ModbusSerialClient(
@@ -238,7 +243,18 @@ class Sync_AASD_15A:
             servo_number (int): servo motor number (see Pn065).
             clockwise (bool, optional): CCW or CW. Defaults to False (CCW).
         """
-        self.write_noconvert(servo_number, 97, 1) if clockwise else self.write_noconvert(servo_number, 97, 0)            
+        self.write_noconvert(servo_number, 97, 1) if clockwise else self.write_noconvert(servo_number, 97, 0)
+        
+    def reverse(self, servo_number:int, reverse:bool=False):
+        """Same as `set_PM_logic_direction`.
+        By default the motor rotates in CCW when you are facing the motor shaft.
+        To reverse this direction set reverse=True.
+
+        Args:
+            servo_number (int): servo motor number (see Pn065).
+            reverse (bool): False: CCW, True: CW. Defaults to False (CCW).
+        """    
+        self.set_PM_logic_direction(servo_number, clockwise=reverse)
             
     def set_PM_electronic_gear_ratio(self, servo_number:int, gear_ratio:int, cell:int=4):
         """Position mode Pn098~Pn101. Set the electronic gear ratio for cell N.
