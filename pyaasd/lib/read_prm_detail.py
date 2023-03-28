@@ -4,13 +4,28 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtUiTools import loadUiType
 from PySide6.QtCore import Slot
 
-this_dir=os.path.dirname(os.path.abspath(__file__))
-root_dir=os.path.dirname(this_dir)
+this_dir=os.path.dirname(os.path.abspath(__file__)) # lib
+root_dir=os.path.dirname(os.path.dirname(this_dir))
 # sys.path.insert(1, os.path.join(root_dir, 'pyaasd/ui'))
 docs_dir=os.path.join(root_dir, 'docs')
 
 txtfilepath=os.path.join(docs_dir, 'prms_detail')
 
+def to_children(item_list):
+    children=[]
+    for item in item_list:
+        default= 0 if item['default'] == 'Rated speed' else item['default']
+        child={
+            'title': item['function'].lower() + " "*4,
+            'name': item['function'].lower().replace(' ', '_'),
+            'type': 'float' if '.' in item['range'] else 'int', #TODO for key 'type': list or group if not continous values
+            'default': float(default) if '.' in item['range'] else int(float(default)),
+            'suffix': item['unit'], 
+            'tip': item['description'].split('\n')[0],
+        }
+        children.append(child)
+    return children
+    
 class PrmsDetail:
     def __init__(self, filepath=txtfilepath) -> None:
         file1 = open(filepath, 'r')

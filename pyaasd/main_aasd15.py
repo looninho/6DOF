@@ -2,6 +2,7 @@
 '''
 import sys, os
 this_dir = os.path.dirname(os.path.abspath(__file__))
+root_dir=os.path.dirname(this_dir)
 
 from PySide6.QtWidgets import QApplication, QRadioButton
 from PySide6.QtUiTools import loadUiType
@@ -13,7 +14,7 @@ from serial.tools.list_ports import comports
 from pymodbus.framer.rtu_framer import ModbusRtuFramer
 from pymodbus.client import ModbusSerialClient as ModbusClient
 
-Form, Base = loadUiType('ui/aasd15.ui')
+Form, Base = loadUiType( os.path.join(root_dir, 'pyaasd/ui/aasd15.ui'))
 class MainWindow(Form, Base):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
