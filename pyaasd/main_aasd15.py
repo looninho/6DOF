@@ -25,7 +25,12 @@ class MainWindow(Form, Base):
     def _scan_serialports(self):
         for comport in comports():
             self.comports_cb.addItem(comport.device)
-            
+    
+    def init_controller(self):
+        """Initialize the controller and get all data from it.
+        """   
+        print("init_controller from subclass TControl.")
+    
     def connect_signals(self):
         self.comports_cb.addItem("custom")
         self.comports_cb.setCurrentIndex(1)

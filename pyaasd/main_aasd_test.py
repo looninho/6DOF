@@ -64,7 +64,6 @@ if __name__ == "__main__":
     ## test save/restore
     state = Form.settings.saveState()
     Form.settings.restoreState(state)   
+    
     sys.exit(app.exec())
     
-    # if (sys.flags.interactive != 1) or not hasattr(QtCore, 'PYQT_VERSION'):
-    #     QtWidgets.QApplication.instance().exec()

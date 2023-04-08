@@ -1,15 +1,11 @@
-import os, sys
-
-from PySide6.QtWidgets import QApplication
-from PySide6.QtUiTools import loadUiType
-from PySide6.QtCore import Slot
+import os
 
 this_dir=os.path.dirname(os.path.abspath(__file__)) # lib
 root_dir=os.path.dirname(os.path.dirname(this_dir))
 # sys.path.insert(1, os.path.join(root_dir, 'pyaasd/ui'))
 docs_dir=os.path.join(root_dir, 'docs')
 
-txtfilepath=os.path.join(docs_dir, 'prms_detail')
+parmtxt=os.path.join(docs_dir, 'prms_detail')
 
 def to_children(item_list):
     children=[]
@@ -21,13 +17,37 @@ def to_children(item_list):
             'type': 'float' if '.' in item['range'] else 'int', #TODO for key 'type': list or group if not continous values
             'default': float(default) if '.' in item['range'] else int(float(default)),
             'suffix': item['unit'], 
-            'tip': item['description'].split('\n')[0],
+            'tip': item['description'],
         }
         children.append(child)
     return children
-    
+
+def SigIn_gen():
+    keyList = [ # 31 keys
+        'Sen', 'Punlock', 'Pdistance', 'Psource', 
+        'Pstop', 'Ptrigger', 'Pos2', 'Pos1', 
+        'REF', 'GOH', 'PC', 'INH', 
+        'Pclear', 'Cinv', 'GN2', 'GN1', 
+        'Cgain', 'Cmode', 'TR2', 
+        'TR1', 'Sp3', 'Sp2', 'Sp1', 
+        'ZeroLock', 'EMG', 'TCW', 'TCCW', 
+        'CWL', 'CCWL', 'AlarmRst', 'SON',          
+    ]
+    SigIn = {key: None for key in keyList}
+    return SigIn
+
+def SigOut_gen():
+    keyList = [ # 13 keys
+        'TCMDreach', 'SPL', 'TQL', 'Pnear', 'HOME', 'BRK', 'Run',
+        'ZerpSpeed', 'Treach', 'Sreach', 'Preach', 'Ready', 'Alarm'
+    ]
+    SigOut = {key: None for key in keyList}
+    return SigOut
+
+
+
 class PrmsDetail:
-    def __init__(self, filepath=txtfilepath) -> None:
+    def __init__(self, filepath=parmtxt) -> None:
         file1 = open(filepath, 'r')
         self.Lines = file1.readlines()
 
@@ -74,52 +94,4 @@ class PrmsDetail:
                 #     return
         return prms_detail
 
-Form, Base = loadUiType( os.path.join(root_dir, 'pyaasd/ui/prm_description.ui'))
-class DescWindow(Form, Base):
-    def __init__(self, parent=None):
-        super(DescWindow, self).__init__(parent)
-        self.setupUi(self)
-        prms_d=PrmsDetail(txtfilepath)
-        self.all_desc=prms_d.read_detail()
-        self.initUi()
-        self.connect_signals()
-        
-    def connect_signals(self):
-        self.category_cb.currentTextChanged.connect(self.update_prm_list)
-        self.parameter_cb.currentTextChanged.connect(self.update_description)
-        
-    def initUi(self):
-        for key in self.all_desc.keys():
-            self.category_cb.addItem(key)
-        self.update_prm_list(self.category_cb.currentText())
-            
-    @Slot(str)
-    def update_prm_list(self, category:str):
-        self.parameter_cb.clear()
-        for elm in self.all_desc[category]:
-            self.parameter_cb.addItem(elm['function'])
-        self.update_description(self.parameter_cb.currentText())
-            
-    @Slot(str)
-    def update_description(self, prm_name:str):
-        category = self.category_cb.currentText()
-        current_prm_idx = self.parameter_cb.currentIndex()
-        self.reboot_le.setText(self.all_desc[category][current_prm_idx]['reboot'])
-        self.description_te.setText(self.all_desc[category][current_prm_idx]['description'])
-        self.range_low_le.setText(str(self.all_desc[category][current_prm_idx]['range'][0]))
-        self.range_high_le.setText(str(self.all_desc[category][current_prm_idx]['range'][1]))
-        self.default_le.setText(self.all_desc[category][current_prm_idx]['default'])
-        self.unit_le.setText(self.all_desc[category][current_prm_idx]['unit'])
-        self.apply_le.setText(self.all_desc[category][current_prm_idx]['apply'])
-        
-if __name__ == "__main__":
-    # prms_d=PrmsDetail(txtfilepath)
-    # d=prms_d.read_detail()
-    # list_keys = list(d.keys())
-    # # print(list_keys)
-    # for item in d.items():
-    #     print( len(item[1]), [ item[1][0]['function'], item[1][-1]['function'] ] )
-    app = QApplication([])
-    window = DescWindow()
-    window.show()
-    sys.exit(app.exec())
+

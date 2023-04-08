@@ -183,10 +183,10 @@ class ControllerParameterTree(QtWidgets.QWidget):
 if __name__ == "__main__":
     import sys, os
     this_dir=os.path.dirname(os.path.abspath(__file__))
-    src_dir=os.path.dirname(this_dir)
-    sys.path.insert(1, src_dir)
+    # src_dir=os.path.dirname(this_dir)
+    # sys.path.insert(1, src_dir)
     
-    from read_prm_detail import PrmsDetail
+    from utils import PrmsDetail
     
     def to_children(item_list):
         children=[]
@@ -199,6 +199,8 @@ if __name__ == "__main__":
                 'default': float(default) if '.' in item['range'] else int(float(default)),
                 'suffix': item['unit'], 
                 'tip': item['description'].split('\n')[0],
+                'readonly': False,
+                'visible': False, # change with .setOpts(visible=True) 
             }
             children.append(child)
         return children

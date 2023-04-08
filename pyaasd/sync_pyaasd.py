@@ -24,6 +24,8 @@ sys.path.insert(1, os.path.join(this_dir, 'lib'))
 from pymodbus.client import ModbusSerialClient
 from pymodbus.framer.rtu_framer import ModbusRtuFramer
 
+import numpy as np
+
 # User parameter mode (Pn) operation
 # address 0000H..00ECH or 0..236 (dec): Pn000..Pn236 (read-write)
 
@@ -35,7 +37,7 @@ from pymodbus.framer.rtu_framer import ModbusRtuFramer
 
 NUMBER_MOTORS = 6
 
-def read_16bits(val) -> str:
+def read_16bits(val, fill:int) -> str:
     """Convert val to binary representation.
 
     Args:
@@ -46,6 +48,25 @@ def read_16bits(val) -> str:
     """    
     return bin(val).replace('0b', '').zfill(15)
 
+def to_signed_int(nums:list)->list:
+    signed_int=[]
+    for num in nums:
+        # convert to 32-bit signed integer
+        if num & (1 << 15):
+            num = -((num ^ 0xffff) + 1)
+        signed_int.append(num)
+    return signed_int
+
+def read_signed_values(client:ModbusSerialClient, slave:int,  mb_addr:int, count:int=1)->list:
+    rr = client.read_holding_registers(mb_addr, count, slave=slave)
+    return to_signed_int(rr.registers)
+
+def parse_values(keys:list, values:list)-> dict:
+    d={}    
+    for k, v in zip(keys, values):
+        d[k]=v
+    return d
+
 # ? Should use it
 class ErrorStatus(Exception):
     """ Example:
@@ -55,6 +76,86 @@ class ErrorStatus(Exception):
     """
     pass
 
+class Sync_AASD_Alarm:
+    """modbus addresses from 356 to 365 for Fn000 to view Sn0~Sn9, read only.
+    The larger the Sn (serial number) of the alarm, the ealier the alarm occurs.
+    Sn0 is the most recent alarm.
+    There are 46 alarms: AL-01~AL-46
+    """    
+    def __init__(self, client:ModbusSerialClient):
+        self.client=client
+    
+    def refresh(self, servo_number:int) -> list:
+        alarm_vals=read_signed_values(self.client, servo_number, 356, 8)
+        alarm_vals.append(read_signed_values(self.client, servo_number, 364, 2))
+        self.keys=['Sn-'+str(i+1) for i in range(10)]
+        self.parameters = parse_values(self.keys, alarm_vals)
+        return 0
+    
+    def speed_command(self, servo_number:int):
+        if hasattr(self, "parameters"):
+            addr = 357
+            self.parameters[self.keys[addr-356]] = read_signed_values(self.client, servo_number, addr, 1)[0]
+            return self.parameters[self.keys[addr-356]]
+
+    def torque_average(self, servo_number:int):
+        if hasattr(self, "parameters"):
+            addr = 358
+            self.parameters[self.keys[addr-356]] = read_signed_values(self.client, servo_number, addr, 1)[0]
+            return self.parameters[self.keys[addr-356]]
+
+    def position_deviation(self, servo_number:int):
+        if hasattr(self, "parameters"):
+            addr = 359
+            self.parameters[self.keys[addr-356]] = read_signed_values(self.client, servo_number, addr, 1)[0]
+            return self.parameters[self.keys[addr-356]]
+
+class Sync_AASD_Monitor:
+    """modbus addresses from 368 to 396 for Dn000 to Dn028, read only
+    """    
+    def __init__(self, client:ModbusSerialClient):
+        self.client=client
+    
+    def refresh(self, servo_number:int) -> list:
+        """read all
+        """ 
+        keys = ['display', 'speed command', 'torque average', 'position deviation', 
+                'AC power supply voltage', 'max instantaneous torque', 'pulse input frequency',
+                'radiator temperature', 'current motor speed', 
+                'input instruction pulse accumulated low value', 'input instruction pulse accumulated high value', 
+                'encoder position feedback pulse accumulated low value', 'encoder position feedback pulse accumulated high value',
+                'regenerative braking load rate', 'input port signal status',
+                'output port signal status', 'torque analog voltage', 'speed analog voltage',
+                'output register', 'feedback pulse low value', 'feedback pulse high value',
+                'version', 'UVW encoder signals', 'rotor absolute position',
+                'driver type', 'absolute encoder single loop data low',
+                'absolute encoder single loop data high',
+                'absolute encoder multi loop data low',
+                'absolute encoder mulyi loop data high'
+                ]
+        # units = ['', 'r/min', '%', 'Volt', '%', 'kHz", "°C', 'r/min', '']
+        monitor_vals = []
+        for i in range(3):
+            monitor_vals += read_signed_values(self.client, servo_number, 368+i*8, 8)
+        monitor_vals += read_signed_values(self.client, servo_number, 368+24, 5)
+        self.parameters = parse_values(keys, monitor_vals)
+        return 0     
+        
+    def read_SigOut(self, servo_number:int)->dict:
+        """See Dn18, modbus addr (386) :368~396 #TODO: put this function into Monitoring class
+
+        Args:
+            servo_number (int): _description_
+        """        
+        keys = ['TCMDreach', 'SPL', 'TRQL', 'Pnear', 'HOME', 'BRK', 'Run',
+            'ZeroSpeed', 'Treach', 'Sreach', 'Preach', 'EMG', 'Ready', 'Alarm'
+        ]
+        rr = self.client.read_holding_registers(386, 1, slave=servo_number)
+        str_vals = read_16bits(rr.registers[0], len(keys)) # len=14
+        self.SigOut=parse_values(keys, list(map(int, list(str_vals))))
+        return self.SigOut
+
+    
 class Sync_AASD_15A:
     """Serial synchronous AC Servo Driver for AC Servo Motor model 80ST-M02430LB
     """    
@@ -69,7 +170,20 @@ class Sync_AASD_15A:
             strict=strict       
         )
         
-    def read(self, servo_number:int, mb_addr:int) -> int:
+        self.parameters={
+            'settings': {
+                'system': None,
+                'position': None,
+                'speed': None,
+                'torque': None,
+                'extended': None
+            }, 
+            'alarm':None, 
+            'monitoring':None
+        }
+        
+        
+    def _read(self, servo_number:int, mb_addr:int, count:int=1) -> int:
         """read parameter at address mb_addr for servo_number.
 
         Args:
@@ -79,14 +193,16 @@ class Sync_AASD_15A:
         Returns:
             int: signed integer value
         """        
-        rr = self.controller.read_holding_registers(mb_addr, 1, slave=servo_number)
-        num = rr.getRegister(0)
-        # convert to 32-bit signed integer
-        if num & (1 << 15):
-            num = -((num ^ 0xffff) + 1)
-        return num
+        rr = self.controller.read_holding_registers(mb_addr, count, slave=servo_number)
+        nums=[]
+        for num in rr.registers:
+            # convert to 32-bit signed integer
+            if num & (1 << 15):
+                num = -((num ^ 0xffff) + 1)
+            nums.append(num)
+        return nums
 
-    def write_noconvert(self, servo_number:int, mb_addr:int, val:int) -> None:
+    def _write_noconvert(self, servo_number:int, mb_addr:int, val:int) -> None:
         """Write without checking signed value val to parameter at mb_addr for servo_number.
 
         Args:
@@ -97,7 +213,7 @@ class Sync_AASD_15A:
         # signed integer to unsigned
         self.controller.write_register(mb_addr, val, slave=servo_number)        
         
-    def write2(self, servo_number:int, addr_start:int, val1:int, val2:int, signed=True) -> None:
+    def _write2(self, servo_number:int, addr_start:int, val1:int, val2:int, signed=True) -> None:
         """Write 2 consecutive addresses with checking signed values val to parameter at addr_start and addr_start +1 
         for servo_number.
 
@@ -113,7 +229,7 @@ class Sync_AASD_15A:
         usval2 = val2 & 0xffff if signed else val2
         self.controller.write_registers(addr_start, [usval1, usval2], slave=servo_number)
         
-    def write(self, servo_number:int, mb_addr:int, val:int, signed=True) -> None:
+    def _write1(self, servo_number:int, mb_addr:int, val:int, signed=True) -> None:
         """Write with checking signed value val to parameter at mb_addr for servo_number.
         
         Args:
@@ -124,8 +240,136 @@ class Sync_AASD_15A:
         """        
         # signed integer to unsigned
         usval = val & 0xffff if signed else val
-        self.write_noconvert(servo_number, mb_addr, usval)
+        self._write_noconvert(servo_number, mb_addr, usval)
 
+    def read_SigIn_port(self, servo_number:int) -> dict:
+        keyList = ['Sen', 'Punlock', 'Pdistance', 'Psource', 
+           'Pstop', 'Ptrigger', 'Pos2', 'Pos1', 
+           'REF', 'GOH', 'PC', 'INH', 
+           'Pclear', 'Cinv', 'Gn2', 'Gn1', # start register2
+           'Cgain', 'Cmode', 'TR2', 
+           'TR1', 'Sp3', 'Sp2', 'Sp1', 
+           'ZeroLock', 'EMG', 'TCW', 'TCCW', 
+           'CWL', 'CCWL', 'AlarmRst', 'SON', # start register1
+          ]
+        self.SigIn = {key: None for key in keyList}
+        # nums = self._read(servo_number, 68, 2)
+        rr = self.controller.read_holding_registers(68, 4, slave=servo_number)
+        nums = rr.registers
+        regs_mode_and_enable = [read_16bits(num, 15) for num in nums]
+        for i in range(15): # Pn068~Pn171
+            self.SigIn[keyList[i+16]]={'internal': int(regs_mode_and_enable[0][i])}        
+            self.SigIn[keyList[i+1]]={'internal': int(regs_mode_and_enable[1][i])} # don't use [0] = "Sen"
+            self.SigIn[keyList[i+16]]={'enable': int(regs_mode_and_enable[2][i])}
+            self.SigIn[keyList[i+1]]={'enable': int(regs_mode_and_enable[3][i])} # don't use [0] = "Sen"
+        return self.SigIn
+        
+    def read_system_prms(self, servo_number:int, mb_addr:int) -> list:
+        """Return list of 92 values from Pn000 to Pn092 except Pn086. #TODO: extended prms
+
+        Args:
+            servo_number (int): _description_
+            mb_addr (int): _description_
+
+        Returns:
+            list: _description_
+        """               
+        system_op_ids = np.append(
+            np.arange(86),
+            np.arange(87,93)
+        )
+        # TODO: convert signed int
+        for i in range(10):
+            rr = self.controller.read_holding_registers(system_op_ids[i*8], 8, slave=servo_number)
+        system_op_vals=rr.registers
+        rr = self.controller.read_holding_registers(system_op_ids[80], 6, slave=servo_number)
+        system_op_vals.append(rr.registers)
+        rr = self.controller.read_holding_registers(system_op_ids[86], 6, slave=servo_number)
+        system_op_vals.append(rr.registers)
+        return system_op_vals
+    
+    def read_position_prms(self, servo_number:int, mb_addr:int) -> list:
+        """Return list of 46 values from Pn096 to Pn141.
+
+        Returns:
+            _type_: _description_
+        """                
+        position_op_ids = np.arange(96,142)
+        
+        for i in range(5):
+            rr = self.controller.read_holding_registers(position_op_ids[i*8], 8, slave=servo_number)
+        position_op_vals=rr.registers
+        rr = self.controller.read_holding_registers(position_op_ids[40], 6, slave=servo_number)
+        position_op_vals.append(rr.registers)
+        return position_op_vals
+    
+    def read_speed_prms(self, servo_number:int, mb_addr:int) -> list:
+        """Return list of 36 values from Pn146 to Pn183 except Pn180 and Pn181.
+
+        Args:
+            servo_number (int): _description_
+            mb_addr (int): _description_
+
+        Returns:
+            list: _description_
+        """        
+        speed_op_ids = np.append(
+            np.arange(146,180),
+            np.arange(182,184)
+        )
+        
+        for i in range(3):
+            rr = self.controller.read_holding_registers(speed_op_ids[i*8], 8, slave=servo_number)
+        speed_op_vals=rr.registers
+        rr = self.controller.read_holding_registers(speed_op_ids[32], 2, slave=servo_number)
+        speed_op_vals.append(rr.registers)
+        rr = self.controller.read_holding_registers(speed_op_ids[34], 2, slave=servo_number)
+        speed_op_vals.append(rr.registers)
+        return speed_op_vals
+    
+    def read_torque_prms(self, servo_number:int, mb_addr:int) -> list:
+        """Pn186..Pn210
+        """        
+        torque_op_ids = np.arange(186,211)
+        
+        for i in range(3):
+            rr = self.controller.read_holding_registers(torque_op_ids[i*8], 8, slave=servo_number)
+        torque_op_vals=rr.registers
+        rr = self.controller.read_holding_registers(torque_op_ids[24], 1, slave=servo_number)
+        torque_op_vals.append(rr.registers)
+        return torque_op_vals
+    
+    def read_extended_prms(self, servo_number:int, mb_addr:int) -> list:
+        """Return list of 36 values from Pn216 to Pn270 except Pn240 to Pn256 and Pn261 to Pn262. #TODO: extended prms
+
+        Args:
+            servo_number (int): _description_
+            mb_addr (int): _description_
+
+        Returns:
+            list: _description_
+        """        
+        """Pn216..Pn219 #TODO: append from syst op.
+        Pn220..Pn233
+        Pn234..Pn239
+        Pn257..Pn260
+        Pn263..Pn270
+        """        
+        extended_op_ids = np.append(
+            np.arange(216, 240),
+            np.arange(257,261)
+        )
+        extended_op_ids=np.append(extended_op_ids, np.arange(263,271))
+        # TODO: convert signed int
+        for i in range(3):
+            rr = self.controller.read_holding_registers(extended_op_ids[i*8], 8, slave=servo_number)
+        extended_op_vals=rr.registers
+        rr = self.controller.read_holding_registers(extended_op_ids[24], 4, slave=servo_number)
+        extended_op_vals.append(rr.registers)
+        rr = self.controller.read_holding_registers(extended_op_ids[28], 8, slave=servo_number)
+        extended_op_vals.append(rr.registers)
+        return extended_op_vals
+    
     def change_bitN(self, servo_number:int, Pn:int, bit_pos:int, value=1) -> int:
         """Change bitN value of register 1 or 2 (see Pn070 and Pn071)
 
@@ -138,15 +382,15 @@ class Sync_AASD_15A:
         Returns:
             int: Pn value (decimal)
         """        
-        val =  self.read(servo_number, Pn) # int number
-        register = read_16bits(val) # bin format
+        val =  self._read(servo_number, Pn)[0] # int number
+        register = read_16bits(val, 15) # bin format
         list_reg = list(register) # convert to list to change bit10
         list_reg[15-bit_pos-1]=str(value) # set bit10 to value 1 (default)
         reg=''
         for elm in list_reg:
             reg += elm
         val = int(reg, 2) # re-convert to int
-        self.write_noconvert(servo_number, Pn, val)
+        self._write_noconvert(servo_number, Pn, val)
         return val
 
     def trigger(self, servo_number:int, raising=True) -> int:
@@ -161,8 +405,8 @@ class Sync_AASD_15A:
             int: 0
         """        
         Pn, bit_pos=71, 10
-        val =  self.read(servo_number, Pn)
-        register = read_16bits(val)
+        val =  self._read(servo_number, Pn)[0]
+        register = read_16bits(val, 15)
         list_reg = list(register)
         if raising:
             if list_reg[15-bit_pos-1]=='1':
@@ -183,8 +427,9 @@ class Sync_AASD_15A:
             servo_number (int): servo motor number (see Pn065).
             value (int, optional): 0..70. Defaults to 4 (80ST-M02430 motor).
         """        
-        self.write_noconvert(servo_number, 1, value)
-        print("Please reboot the servo motor for taking effect. For permanent write set Fn001")
+        self._write_noconvert(servo_number, 1, value)
+        print("Please reboot the servo motor for taking effect.\n \
+              For permanent write set Pn081 or manually set Fn001")
         
     def set_control_mode(self, servo_number:int, value:int=2):
         """Set control mode. Effect after driver reboot.
@@ -199,7 +444,7 @@ class Sync_AASD_15A:
                 4: Position / torque mode,
                 5: Speed / torque mode
         """     
-        self.write_noconvert(servo_number, 2, value)
+        self._write_noconvert(servo_number, 2, value)
     
     def set_enable_motor(self, servo_number:int, enable:bool=True):
         """Enable motor (Pn003)
@@ -208,7 +453,7 @@ class Sync_AASD_15A:
             servo_number (int): servo motor number (see Pn065).
             enable (bool, optional): _description_. Defaults to True.
         """  
-        self.write_noconvert(servo_number, 1) if enable else self.write_noconvert(servo_number, 0)  
+        self._write_noconvert(servo_number, 1) if enable else self._write_noconvert(servo_number, 0)  
     
     def set_servo_enable_mode(self, servo_number:int, value:int=0):    
         """Servo enable mode (Pn003)
@@ -219,7 +464,7 @@ class Sync_AASD_15A:
                 0: the SON (servo ON) enable drive from the input port SigIn
                 1: Automatically enable drive after power on.
         """  
-        self.write_noconvert(servo_number, value)
+        self._write_noconvert(servo_number, value)
         
     def allow_internal_control(self, servo_number:int, allow:bool=True):
         """system settings for internal instruction mode.
@@ -243,7 +488,7 @@ class Sync_AASD_15A:
             servo_number (int): servo motor number (see Pn065).
             clockwise (bool, optional): CCW or CW. Defaults to False (CCW).
         """
-        self.write_noconvert(servo_number, 97, 1) if clockwise else self.write_noconvert(servo_number, 97, 0)
+        self._write_noconvert(servo_number, 97, 1) if clockwise else self._write_noconvert(servo_number, 97, 0)
         
     def reverse(self, servo_number:int, reverse:bool=False):
         """Same as `set_PM_logic_direction`.
@@ -270,7 +515,7 @@ class Sync_AASD_15A:
         assert cell in range(1,5)
         assert gear_ratio in range(1, 32768)
         Pn=97+cell # Pn098~Pn101
-        self.write_noconvert(servo_number, Pn, gear_ratio)
+        self._write_noconvert(servo_number, Pn, gear_ratio)
         
     def set_PM_accel_decel_mode(self, servo_number:int, function_nb:int=2):
         """Position mode Pn109.Set function filter for acceleration and deceleration mode.
@@ -279,7 +524,7 @@ class Sync_AASD_15A:
             servo_number (int): servo motor number (see Pn065).
             function_nb (int, optional): 0~2. Defaults to 2. 0: no filtering, 1: smooth one time, 2: S-curve.
         """        
-        self.write_noconvert(servo_number, 109, function_nb)
+        self._write_noconvert(servo_number, 109, function_nb)
         
     def set_PM_command_source_selection(self, servo_number:int, source:int=2):
         """Position mode Pn117. Select source for position command.
@@ -289,7 +534,7 @@ class Sync_AASD_15A:
             servo_number (int): servo motor number (see Pn065).
             source (int, optional): 0~3. Defaults to 2 (internal if SigIn Psourec=1).
         """        
-        self.write_noconvert(servo_number, 117, source)
+        self._write_noconvert(servo_number, 117, source)
         
     def set_PM_move(self, servo_number:int, n_high:int, n_low:int, internal_cmd:int=0, trigger=True):
         """Position mode Pn120~Pn127. Set motor position and trigger the movement.
@@ -301,7 +546,7 @@ class Sync_AASD_15A:
         """        
         assert internal_cmd in range(4)
         Pn=120+2*internal_cmd
-        self.write2(servo_number, Pn, n_high, n_low)
+        self._write2(servo_number, Pn, n_high, n_low)
         if trigger:
             self.trigger(servo_number)
 

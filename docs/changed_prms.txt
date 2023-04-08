@@ -1,0 +1,6 @@
+Pn  val / default
+1   4 / 7         motor code
+2   0(torque), 1 (speed), 2 (position), 3 (position/speed), 4 (position/torque), 5 (speed/torque)
+3   1 / 0         servo enable
+4   1 / 0         slow down and stop. The deceleration time is determined by Pn005
+5   100 / 100     ms slow down to zero. In deceleration process if enable again: slow down to zero

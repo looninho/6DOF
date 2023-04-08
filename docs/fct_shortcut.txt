@@ -1,0 +1,80 @@
+# control mode: IGBT pwm; power pwm
+
+# control model:
+1 Torque mode
+2 Speed mode
+3 Position mode
+4 Position / speed mode
+5 Position / torque mode
+6 Speed / torque mode
+
+# control input
+Servo enable
+alarm reset
+forward drive
+inhibit and reverse drive prohibited
+External forward torque limit
+Eexternal reverse torque limit
+emergency stop
+Zero speed clamp
+internal speed command select 1
+internal speed command select 2
+internal speed command select 3
+internal command torque select 1
+internal command torque select 2
+control mode switching
+gain switching
+electronic gear select 1
+electronic gear select 2
+instruction counter
+position deviation cleared
+pulse input is forbidden
+proportional control and origin return trigger
+origin regression reference point
+internal position select 1
+internal position select 2
+trigger an internal position instruction
+pause an internal position command
+select an internal and external position command
+Fixed length
+displacement interruption
+fixed length unlocking
+
+# control output
+Alarm detection
+servo ready
+emergency stop detection
+positioning completed
+speed arrives
+arrive at the predetermined torque
+zero speed examination
+servo motor electrify
+electromagnetic brake
+origin return
+position approach
+torque limit
+speed limit
+tracking torque command arrives
+
+# encoder feedback
+1 2500 line incremental encoder
+2 17 bit absolute encoder
+
+# communication mode:
+1 RS-232
+2 RS-485
+
+# Display and operation
+1 5 LED display
+2 4/5 keys
+
+# Braking mode:
+Energy consumption breaking by built-in / external braking resistor
+
+# Cooling method:
+Air cooling (heat conduction mould, high speed strong cooling fan)
+
+# Power range:
+<=10kW
+
+
