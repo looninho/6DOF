@@ -468,7 +468,7 @@ class Sync_AASD_15A:
         
     def allow_internal_control(self, servo_number:int, allow:bool=True):
         """system settings for internal instruction mode.
-        write input fonction control register 2 (Pn069) to allow internal control of Ptrigger (Bit10)
+        write input function control register 2 (Pn069) to allow internal control of Ptrigger (Bit10)
 
         Args:
             servo_number (int): servo motor number (see Pn065).
@@ -482,7 +482,7 @@ class Sync_AASD_15A:
         return 0
     
     def set_PM_logic_direction(self, servo_number:int, clockwise:bool=False):
-        """Position mode Pn097. Set direction CCW (default) when enter a ppsitive command.
+        """Position mode Pn097. Set direction CCW (default) when enter a positive command.
 
         Args:
             servo_number (int): servo motor number (see Pn065).
