@@ -33,7 +33,7 @@ import numpy as np
 # address 0164H..016DH or 356..365 (dec): Fn000..Pn236 (read only)
 
 # Monitoring mode (Dn) operation
-# address 0000H..00ECH or 368..396 (dec): Dn000..Dn028 (write only)
+# address 0170H..018CH or 368..396 (dec): Dn000..Dn028 (write only)
 
 NUMBER_MOTORS = 6
 
