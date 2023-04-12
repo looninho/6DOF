@@ -55,7 +55,7 @@ class DescWindow(Form, Base):
             Pn = int(self.parameter_cb.currentText().lower().replace('pn', ''))
             if hasattr(self, "device"):
                 if self.device.controller.connected:
-                    self.value_le.setText(str(self.device.read(1, Pn)))
+                    self.value_le.setText(str(self.device._read(1, Pn)[0]))
     
     @Slot(str)
     def update_prm_list(self, category:str):

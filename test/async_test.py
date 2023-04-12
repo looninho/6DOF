@@ -1,12 +1,14 @@
 python -m asyncio
 
-import time 
+import time
+from typing import Any
 from pymodbus.client import AsyncModbusSerialClient
 from pymodbus.framer.rtu_framer import ModbusRtuFramer
 from pymodbus.pdu import ExceptionResponse
 
 async_client=AsyncModbusSerialClient(
-    port="COM7", # /dev/ttyUSB0
+    port="COM7",
+    # port="/dev/ttyUSB0",
     framer=ModbusRtuFramer,
     baudrate=115200,
     bytesize=8,
@@ -94,7 +96,7 @@ from pymodbus.pdu import ExceptionResponse
 
 _logger = logging.getLogger()
 
-async def run_async_client(client, modbus_calls=None):
+async def run_async_client(client, modbus_calls=None, **kwargs:Any):
     """Run sync client."""
     _logger.info("### Client starting")
     await client.connect()
@@ -104,7 +106,7 @@ async def run_async_client(client, modbus_calls=None):
     # await client.close()
     _logger.info("### End of Program")
     return rr.registers
-    
+
 async def _handle_holding_registers(client):
     """Read/write holding registers."""
     _logger.info("### write holding register and read holding registers")
@@ -184,7 +186,8 @@ asyncio.run(connect(client))
 
 if __name__ == "__main__":
     client=AsyncModbusSerialClient(
-        port="COM7", # /dev/ttyUSB0
+        port="COM7",
+        # port="/dev/ttyUSB0",
         framer=ModbusRtuFramer,
         baudrate=115200,
         bytesize=8,
@@ -192,9 +195,43 @@ if __name__ == "__main__":
         stopbits=1,
         strict=False                      
     )
-    
+
     asyncio.run(run_async_client(client, modbus_calls=run_async_calls), debug=True)
-    
+
+
+async def main(rate, timeout_secondes:float=5.0):
+    loop = asyncio.get_running_loop()
+    end_time = loop.time() + timeout_secondes
+    client = AsyncModbusSerialClient(
+        port="COM7",
+        framer=ModbusRtuFramer,
+        baudrate=115200,
+        bytesize=8,
+        parity="O",
+        stopbits=1,
+        strict=False
+    )
+    while True:
+        await client.connect()
+        rr = await client.read_holding_registers(356, 8, slave=1)
+        alarm_vals = to_signed_int(rr.registers)
+        rr = await client.read_holding_registers(364, 2, slave=1)
+        alarm_vals += to_signed_int(rr.registers)
+        monitor_vals = []
+        for i in range(3):
+            rr = await client.read_holding_registers(368+i*8, 8, slave=1)
+            monitor_vals += to_signed_int(rr.registers)
+        rr = await client.read_holding_registers(368+3*8, 5, slave=1)
+        monitor_vals += to_signed_int(rr.registers)
+        if (loop.time() + 1.0) >= end_time:
+            break
+        await asyncio.sleep(1/rate)
+    await client.close()
+    return alarm_vals, monitor_vals
+
+
+asyncio.run(main(1, 2))
+
     # background_tasks = set()
     
     # for i in range(10):

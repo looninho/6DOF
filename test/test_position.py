@@ -13,7 +13,7 @@ for port in comports():
 
 slave = 1
 
-client=ModbusSerialClient(port="COM7", # /dev/ttyUSB0
+client=ModbusSerialClient(port="COM7", # "/dev/ttyUSB0",
                           framer=ModbusRtuFramer,
                           baudrate=115200,
                           bytesize=8,
