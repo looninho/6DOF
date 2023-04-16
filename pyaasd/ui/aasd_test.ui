@@ -17,13 +17,8 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="controller">
      <property name="currentIndex">
-      <number>6</number>
+      <number>5</number>
      </property>
-     <widget class="QWidget" name="system_tab">
-      <attribute name="title">
-       <string>System</string>
-      </attribute>
-     </widget>
      <widget class="QWidget" name="position_tab">
       <attribute name="title">
        <string>Position</string>
@@ -49,15 +44,21 @@
        <string>Alarm</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="comm_tab">
+     <widget class="QWidget" name="settings_tab">
+      <attribute name="icon">
+       <iconset resource="../resources/resources.qrc">
+        <normaloff>:/icon/icon/pinion-icon.png</normaloff>:/icon/icon/pinion-icon.png</iconset>
+      </attribute>
       <attribute name="title">
-       <string>Comm</string>
+       <string>Settings</string>
       </attribute>
      </widget>
     </widget>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources/resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

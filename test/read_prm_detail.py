@@ -46,7 +46,6 @@ class DescWindow(Form, Base):
     
     @Slot()
     def connect_device(self):
-        
         self.device = Sync_AASD_15A(port=self.comports_cb.currentText())
         
     @Slot()

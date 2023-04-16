@@ -3,5 +3,6 @@
     <file>icon/led_16x16_disable.png</file>
     <file>icon/led_16x16_green.png</file>
     <file>icon/led_16x16_red.png</file>
+    <file>icon/pinion-icon.png</file>
   </qresource>
 </RCC>

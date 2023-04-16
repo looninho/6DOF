@@ -10,26 +10,29 @@ from pyqtgraph.parametertree import Parameter, ParameterTree, ParameterItem, reg
 from serial.tools.list_ports import comports
 from apscheduler.schedulers.background import BackgroundScheduler
 
-MAX_SLAVE_NUMBER = 6
+MAX_SLAVE_NUMBER = 1
 
 available_ports = []
 for port in comports():
     available_ports.append(port.device)
 
-dict_baudrates = {'4800': 0, '9600': 1, '19200': 2, '38400': 3, '57600':4, '115200': 5}
+# dict_baudrates = {'4800': 0, '9600': 1, '19200': 2, '38400': 3, '57600':4, '115200': 5}
+list_baudrates = [4800, 9600, 19200, 38400, 57600, 115200]
 
-dict_parities = {'E': 0, 'O': 1, 'N': 2}    
+# dict_parities = {'E': 0, 'O': 1, 'N': 2}    
+list_parities = ['E', 'O', 'N']
 
-dict_stopbits = {'0': 0, '1': 1, '2': 2}
+# dict_stopbits = {'0': 0, '1': 1, '2': 2}
+list_stopbits = [0, 1, 2]
 
 link_interfaces = [
     {'title': 'Serial:', 'name': 'serial', 'type': 'group', 'children': [
         {'title': 'Serial Type:', 'name': 'serial_type', 'type': 'list', 'values': {'RS232': 0, 'RS485': 1}, 'value': 1},
         {'title': 'COM Port:', 'name': 'comport', 'type': 'list', 'values': available_ports},
-        {'title': 'Baud Rate:', 'name': 'baudrate', 'type': 'list', 'values': dict_baudrates, 'value':5},
+        {'title': 'Baud Rate:', 'name': 'baudrate', 'type': 'list', 'values': list_baudrates, 'value':list_baudrates[-1]},
         {'title': 'Byte Size:', 'name': 'bytesize', 'type': 'list', 'values': [7, 8], 'value': 8},
-        {'title': 'Parity:', 'name': 'parity', 'type': 'list', 'values': dict_parities, 'value': 1},
-        {'title': 'Stop bits', 'name': 'stopbits', 'type': 'list', 'values': dict_stopbits, 'value': 1},
+        {'title': 'Parity:', 'name': 'parity', 'type': 'list', 'values': list_parities, 'value': list_parities[1]},
+        {'title': 'Stop bits', 'name': 'stopbits', 'type': 'list', 'values': list_stopbits, 'value': list_stopbits[1]},
         {'title': 'Read Timeout', 'name': 'read_timeout', 'type': 'float', 'value': 0.1, 'dec': True, 'min': 0, 'suffix': 's', 'siPrefix': True},
         ]},
     {'title': 'TCP/IP:', 'name': 'tcpip', 'type': 'group', 'children': [
@@ -151,7 +154,7 @@ class ControllerParameterTree(QtWidgets.QWidget):
         self.scheduler.shutdown()
         self.settings.child('main_settings', 'refresh_rate').setReadonly(readonly=False)
                 
-    ## If anything changes in the tree, print a message
+    ## If anything changes in the tree, print a message or make an action write
     def change(self, param, changes):
         # print("tree changes:")
         for param, change, data in changes:
@@ -186,35 +189,11 @@ if __name__ == "__main__":
     # src_dir=os.path.dirname(this_dir)
     # sys.path.insert(1, src_dir)
     
-    from utils import PrmsDetail
-    
-    def to_children(item_list):
-        children=[]
-        for item in item_list:
-            default= 0 if item['default'] == 'Rated speed' else item['default']
-            child={
-                'title': item['function'].lower() + " "*4,
-                'name': item['function'].lower().replace(' ', '_'),
-                'type': 'float' if '.' in item['range'] else 'int', #TODO for key 'type': list or group if not continous values
-                'default': float(default) if '.' in item['range'] else int(float(default)),
-                'suffix': item['unit'], 
-                'tip': item['description'].split('\n')[0],
-                'readonly': False,
-                'visible': False, # change with .setOpts(visible=True) 
-            }
-            children.append(child)
-        return children
-    
+    from utils import get_all_params, PrmsDetail
+        
     prms_d=PrmsDetail()
     d=prms_d.read_detail()
-    all_params = []
-    for key, item in d.items():
-        params={'title': key,
-                'name': key.replace(' ', '_'), 
-                'expanded': False,
-                'type': 'group',
-                'children': to_children(item),}
-        all_params.append(params)
+    all_params = get_all_params(d)
     
     list_aasd_settings = []
     for i in range(MAX_SLAVE_NUMBER):

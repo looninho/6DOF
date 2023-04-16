@@ -7,7 +7,7 @@ docs_dir=os.path.join(root_dir, 'docs')
 
 parmtxt=os.path.join(docs_dir, 'prms_detail')
 
-def to_children(item_list):
+def to_children(item_list)->list:
     children=[]
     for item in item_list:
         default= 0 if item['default'] == 'Rated speed' else item['default']
@@ -16,12 +16,26 @@ def to_children(item_list):
             'name': item['function'].lower().replace(' ', '_'),
             'type': 'float' if '.' in item['range'] else 'int', #TODO for key 'type': list or group if not continous values
             'default': float(default) if '.' in item['range'] else int(float(default)),
+            'limits': item['range'],
             'suffix': item['unit'], 
             'tip': item['description'],
+            'readonly': False,
+            'visible': True, # change with .setOpts(visible=True) 
         }
         children.append(child)
     return children
 
+def get_all_params(prms:dict)->list:
+    all_params = []
+    for key, item in prms.items():
+        params={'title': key,
+                'name': key.replace(' ', '_'), 
+                'expanded': False,
+                'type': 'group',
+                'children': to_children(item),}
+        all_params.append(params)
+    return all_params
+    
 def SigIn_gen():
     keyList = [ # 31 keys
         'Sen', 'Punlock', 'Pdistance', 'Psource', 
