@@ -186,15 +186,11 @@ class ControllerParameterTree(QtWidgets.QWidget):
 if __name__ == "__main__":
     import sys, os
     this_dir=os.path.dirname(os.path.abspath(__file__))
-    # src_dir=os.path.dirname(this_dir)
-    # sys.path.insert(1, src_dir)
+    src_dir=os.path.dirname(this_dir)
+    sys.path.insert(1, src_dir)
     
     from utils import get_all_params, PrmsDetail
-        
-    prms_d=PrmsDetail()
-    d=prms_d.read_detail()
-    all_params = get_all_params(d)
-    
+            
     list_aasd_settings = []
     for i in range(MAX_SLAVE_NUMBER):
         list_aasd_settings += [
@@ -203,7 +199,8 @@ if __name__ == "__main__":
                 'name': 'servo_'+str(i+1), 
                 'expanded': False, 
                 'type': 'group', 
-                'children': all_params
+                # 'children': all_params
+                'children': []
             }
         ]
     controller_params = [
@@ -214,7 +211,36 @@ if __name__ == "__main__":
     prmtt = ControllerParameterTree(controller_params)
     prmtt.add_parametertree()
     prmtt.show()
+    
+    ## add group
+    group = {'title': 'System parameter',
+                'name': 'System parameter'.lower().replace(' ', '_'), 
+                'expanded': False,
+                'type': 'group',
+                'children': [],}
+    
+    # add child Pn000
+    child = {
+        'title': 'Pn000' + " "*4,
+        'name': 'pn000',
+        'type': 'int',
+        'default': int(float(1)),
+        'limits': [0,3],
+        'suffix': '', 
+        'tip': 'Parameter editing and initialization',
+        'readonly': False,
+        'visible': True, # change with .setOpts(visible=True) 
+    }
+    
+    # prms_d=PrmsDetail()
+    # d=prms_d.read_detail()
+    # all_params = get_all_params(d)
 
+    prmtt.settings.param('device_settings', 'servo_1').addChildren([group])
+    prmtt.settings.param('device_settings', 
+                         'servo_1', 
+                         'system_parameter').addChild(child)
+    
     ## test save/restore
     state = prmtt.settings.saveState()
     prmtt.settings.restoreState(state)

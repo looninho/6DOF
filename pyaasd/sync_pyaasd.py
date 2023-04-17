@@ -19,7 +19,6 @@ from typing import Dict, List, Any
 
 import os, sys
 
-from brooks.main_brooks import MAX_INSTANCE_NUMBER
 this_dir=os.path.dirname(os.path.abspath(__file__))
 # parent_dir=os.path.dirname(this_dir)
 sys.path.insert(1, os.path.join(this_dir, 'lib'))
@@ -185,7 +184,7 @@ class Sync_AASD_Monitor:
                 'driver type', 'absolute encoder single loop data low',
                 'absolute encoder single loop data high',
                 'absolute encoder multi loop data low',
-                'absolute encoder mulyi loop data high'
+                'absolute encoder multi loop data high'
                 ]
         # units = ['', 'r/min', '%', 'Volt', '%', 'kHz", "°C', 'r/min', '']
         monitor_vals = []
@@ -216,6 +215,15 @@ class Sync_AASD_Settings:
         self.client=client
 
     def read_SigIn_port(self, servo_number:int) -> dict:
+        """Return dictionary of SigIn: {SigIn_name: {internal:bool, enable: bool}, }.
+        Internal is RS485.
+
+        Args:
+            servo_number (int): _description_
+
+        Returns:
+            dict: _description_
+        """        
         keyList = ['Sen', 'Punlock', 'Pdistance', 'Psource', 
            'Pstop', 'Ptrigger', 'Pos2', 'Pos1', 
            'REF', 'GOH', 'PC', 'INH', 
@@ -236,7 +244,7 @@ class Sync_AASD_Settings:
             self.SigIn[keyList[i+1]]={'enable': int(regs_mode_and_enable[3][i])} # don't use [0] = "Sen"
         return self.SigIn
         
-    def read_system_prms(self, servo_number:int) -> list:
+    def read_system_prms(self, servo_number:int) -> dict:
         """Return list of 92 values from Pn000 to Pn092 except Pn086.
 
         Args:
@@ -244,28 +252,33 @@ class Sync_AASD_Settings:
             mb_addr (int): _description_
 
         Returns:
-            list: _description_
+            dict: system parameters
         """               
+        keys = ['Pn'+str(i).zfill(3) for i in range(86)]
+        keys += ['Pn'+str(i).zfill(3) for i in range(87,93)]
         system_op_vals = []
         for i in range(10):
             system_op_vals += read_signed_values(self.client, servo_number, i*8, 8)
         system_op_vals += read_signed_values(self.client, servo_number, 80, 6)
         system_op_vals += read_signed_values(self.client, servo_number, 87, 6)
-        return system_op_vals
+        self.system_prms = parse_values(keys, system_op_vals)
+        return self.system_prms
     
-    def read_position_prms(self, servo_number:int) -> list:
+    def read_position_prms(self, servo_number:int) -> dict:
         """Return list of 46 values from Pn096 to Pn141.
 
         Returns:
-            _type_: _description_
-        """                
+            dict: position parameters
+        """ 
+        keys = ['Pn'+str(i).zfill(3) for i in range(96, 142)]               
         position_op_vals = []
         for i in range(5):
             position_op_vals += read_signed_values(self.client, servo_number, 96+i*8, 8)
         position_op_vals += read_signed_values(self.client, servo_number, 136, 6)
-        return position_op_vals
+        self.position_prms = parse_values(keys, position_op_vals)
+        return self.position_prms
     
-    def read_speed_prms(self, servo_number:int) -> list:
+    def read_speed_prms(self, servo_number:int) -> dict:
         """Return list of 36 values from Pn146 to Pn183 except Pn180 and Pn181.
 
         Args:
@@ -273,16 +286,19 @@ class Sync_AASD_Settings:
             mb_addr (int): _description_
 
         Returns:
-            list: _description_
-        """        
+            dict: speed parameters
+        """  
+        keys = ['Pn'+str(i).zfill(3) for i in range(146, 180)]
+        keys += ['Pn'+str(i).zfill(3) for i in range(182, 184)]
         speed_op_vals = []
         for i in range(4):
             speed_op_vals += read_signed_values(self.client, servo_number, 146+i*8, 8)
         speed_op_vals += read_signed_values(self.client, servo_number, 178, 2)
         speed_op_vals += read_signed_values(self.client, servo_number, 182, 2)
-        return speed_op_vals
+        self.speed_prms = parse_values(keys, speed_op_vals)
+        return self.speed_prms
     
-    def read_torque_prms(self, servo_number:int) -> list:
+    def read_torque_prms(self, servo_number:int) -> dict:
         """Return list of 25 values from Pn186 to Pn210.
 
         Args:
@@ -290,15 +306,17 @@ class Sync_AASD_Settings:
             mb_addr (int): _description_
 
         Returns:
-            list: _description_
-        """        
+            dict: torque parameters
+        """  
+        keys = ['Pn'+str(i).zfill(3) for i in range(186, 211)]      
         torque_op_vals = []
         for i in range(3):
             torque_op_vals += read_signed_values(self.client, servo_number, 186+i*8, 8)
         torque_op_vals += read_signed_values(self.client, servo_number, 210, 1)
-        return torque_op_vals
+        self.torque_prms = parse_values(keys, torque_op_vals)
+        return self.torque_prms
     
-    def read_extended_prms(self, servo_number:int) -> list:
+    def read_extended_prms(self, servo_number:int) -> dict:
         """Return list of 36 values from Pn216 to Pn270 except Pn240 to Pn256 and Pn261 to Pn262.
 
         Args:
@@ -306,26 +324,34 @@ class Sync_AASD_Settings:
             mb_addr (int): _description_
 
         Returns:
-            list: _description_
+            dict: exyended parameters
         """               
+        keys = ['Pn'+str(i).zfill(3) for i in range(216, 240)]
+        keys += ['Pn'+str(i).zfill(3) for i in range(257, 261)]
+        keys += ['Pn'+str(i).zfill(3) for i in range(263, 271)]
         extended_op_vals = []
         for i in range(3):
             extended_op_vals += read_signed_values(self.client, servo_number, 216+i*8, 8)
         extended_op_vals += read_signed_values(self.client, servo_number, 257, 4)
         extended_op_vals += read_signed_values(self.client, servo_number, 263, 8)
-        return extended_op_vals
+        self.extended_prms = parse_values(keys, extended_op_vals)
+        return self.extended_prms
 
     def refresh(self, servo_number:int) -> list:
-        system_op_vals = self.read_system_prms(servo_number)
-        position_op_vals = self.read_position_prms(servo_number)
-        speed_op_vals = self.read_speed_prms(servo_number)
-        torque_op_vals = self.read_torque_prms(servo_number)
-        extended_op_vals = self.read_extended_prms(servo_number)
-        
+        self.read_system_prms(servo_number)
+        self.read_position_prms(servo_number)
+        self.read_speed_prms(servo_number)
+        self.read_torque_prms(servo_number)
+        self.read_extended_prms(servo_number)    
+        return 0
+    
+    
 class Sync_AASD_15A:
-    """Serial synchronous AC Servo Driver for AC Servo Motor model 80ST-M02430LB
+    """Serial synchronous AC Servo Driver for AC Servo Motor model 80ST-M02430LB.
+    Wrapper of Sync_AASD_Alarm, Sync_AASD_Monitor ans Sync_AASD_Settings.
     """    
-    def __init__(self, port:str, framer=ModbusRtuFramer, baudrate=115200, bytesize=8, parity="O", stopbits=1, strict=False):
+    def __init__(self, port:str, framer=ModbusRtuFramer, baudrate=115200, bytesize=8, parity="O", stopbits=1, strict=False, n_motors=1):
+        self.n_motors = n_motors
         self.client = ModbusSerialClient(
             port=port,
             framer=framer,
@@ -338,25 +364,25 @@ class Sync_AASD_15A:
         self.alarm = Sync_AASD_Alarm(self.client)
         self.monitor = Sync_AASD_Monitor(self.client)
         self.settings = Sync_AASD_Settings(self.client)
-        self.parameters={
-            'settings': {
-                'system': None,
-                'position': None,
-                'speed': None,
-                'torque': None,
-                'extended': None
-            }, 
-            'alarm':None, 
-            'monitoring':None
-        }
+        # self.parameters={
+        #     'settings': {
+        #         'system': None,
+        #         'position': None,
+        #         'speed': None,
+        #         'torque': None,
+        #         'extended': None
+        #     }, 
+        #     'alarm':None, 
+        #     'monitoring':None
+        # }
     
     def refresh(self):
         if not self.client.connected:
             self.client.connect()
-        for servo_id in range(NUMBER_MOTORS):
-            self.alarm.refresh(servo_id)
-            self.monitor.refresh(servo_id)
-            self.settings.refresh(servo_id)
+        for servo_id in range(1, self.n_motors+1):
+            self.alarm.refresh(servo_id) # get prms by self.alarm.parameters
+            self.monitor.refresh(servo_id) # get prms by self.monitor.parameters
+            self.settings.refresh(servo_id) # get prms by self.settings.system_prms, position_prms,.., extended_prms
                     
     def change_bitN(self, servo_number:int, Pn:int, bit_pos:int, value=1) -> int:
         """Change bitN value of register 1 or 2 (see Pn070 and Pn071)
@@ -466,6 +492,7 @@ class Sync_AASD_15A:
             clockwise (bool, optional): CCW or CW. Defaults to False (CCW).
         """
         write_noconvert(self.client, servo_number, 97, 1) if clockwise else write_noconvert(self.client, servo_number, 97, 0)
+        return 0
         
     def reverse(self, servo_number:int, reverse:bool=False):
         """Same as `set_PM_logic_direction`.
