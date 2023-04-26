@@ -189,7 +189,7 @@ if __name__ == "__main__":
     src_dir=os.path.dirname(this_dir)
     sys.path.insert(1, src_dir)
     
-    from utils import get_all_params, PrmsDetail
+    # from utils import get_all_params, PrmsDetail
             
     list_aasd_settings = []
     for i in range(MAX_SLAVE_NUMBER):

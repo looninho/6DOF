@@ -23,11 +23,12 @@ this_dir=os.path.dirname(os.path.abspath(__file__))
 # parent_dir=os.path.dirname(this_dir)
 sys.path.insert(1, os.path.join(this_dir, 'lib'))
 
-# from serial.tools.list_ports import comports
 from pymodbus.client import ModbusSerialClient
 from pymodbus.framer.rtu_framer import ModbusRtuFramer
 
 import numpy as np
+
+from lib.utils import PrmsDetail, parse_simple, parse_values
 
 # User parameter mode (Pn) operation
 # address 0000H..00ECH or 0..236 (dec): Pn000..Pn236 (read-write)
@@ -52,9 +53,9 @@ def read_16bits(val, fill:int) -> str:
     return bin(val).replace('0b', '').zfill(15)
 
 def to_signed_int(nums:list)->list:
+    # convert to 32-bit signed integer
     signed_int=[]
     for num in nums:
-        # convert to 32-bit signed integer
         if num & (1 << 15):
             num = -((num ^ 0xffff) + 1)
         signed_int.append(num)
@@ -76,7 +77,7 @@ def read_signed_values(client:ModbusSerialClient, slave:int,  mb_addr:int, count
     return to_signed_int(rr.registers)
 
 def write_noconvert(client:ModbusSerialClient, slave:int,  mb_addr:int, value:int) -> None:
-    """Simple write without checking if signed value val to parameter at mb_addr for servo_number.
+    """Simple write without checking if signed value val to mb_addr for slave number.
 
     Args:
         client (ModbusSerialClient): The modbus client
@@ -101,7 +102,7 @@ def writes(client:ModbusSerialClient, slave:int,  addr_start:int, values:List[in
     client.write_registers(addr_start, uvals, slave=slave)
     
 def write(client:ModbusSerialClient, slave:int,  mb_addr:int, value:int, signed=True) -> None:
-    """Write one value with checking signed value val to parameter at mb_addr for servo_number.
+    """Write one value with checking signed value val to mb_addr for servo_number.
     
     Args:
         client (ModbusSerialClient): The modbus client
@@ -114,11 +115,6 @@ def write(client:ModbusSerialClient, slave:int,  mb_addr:int, value:int, signed=
     uval = value & 0xffff if signed else value
     client.write_register(mb_addr, uval, slave=slave)
 
-def parse_values(keys:list, values:list)-> dict:
-    d={}    
-    for k, v in zip(keys, values):
-        d[k]=v
-    return d
 
 # ? Should use it
 class ErrorStatus(Exception):
@@ -137,37 +133,36 @@ class Sync_AASD_Alarm:
     """    
     def __init__(self, client:ModbusSerialClient):
         self.client=client
+        self.parameters = {}
     
     def refresh(self, servo_number:int) -> list:
         alarm_vals=read_signed_values(self.client, servo_number, 356, 8)
         alarm_vals.append(read_signed_values(self.client, servo_number, 364, 2))
         self.keys=['Sn-'+str(i+1) for i in range(10)]
-        self.parameters = parse_values(self.keys, alarm_vals)
+        self.parameters[servo_number] = parse_simple(self.keys, alarm_vals)
         return 0
     
-    def speed_command(self, servo_number:int):
+    def _read(self, addr:int, addr_offset:int, servo_number:int):
         if hasattr(self, "parameters"):
-            addr = 357
-            self.parameters[self.keys[addr-356]] = read_signed_values(self.client, servo_number, addr, 1)[0]
-            return self.parameters[self.keys[addr-356]]
+            self.parameters[servo_number][self.keys[addr-addr_offset]] = read_signed_values(self.client, servo_number, addr, 1)[0]
+            return self.parameters[servo_number][self.keys[addr-addr_offset]]
+        return
+    
+    def speed_command(self, servo_number:int):
+        return self._read(357, 356, servo_number)
 
     def torque_average(self, servo_number:int):
-        if hasattr(self, "parameters"):
-            addr = 358
-            self.parameters[self.keys[addr-356]] = read_signed_values(self.client, servo_number, addr, 1)[0]
-            return self.parameters[self.keys[addr-356]]
+        return self._read(358, 356, servo_number)
 
     def position_deviation(self, servo_number:int):
-        if hasattr(self, "parameters"):
-            addr = 359
-            self.parameters[self.keys[addr-356]] = read_signed_values(self.client, servo_number, addr, 1)[0]
-            return self.parameters[self.keys[addr-356]]
+        return self._read(359, 356, servo_number)
 
 class Sync_AASD_Monitor:
     """modbus addresses from 368 to 396 for Dn000 to Dn028, read only
     """    
     def __init__(self, client:ModbusSerialClient):
         self.client=client
+        self.parameters, self.SigOut = {}, {}
     
     def refresh(self, servo_number:int) -> list:
         """read all
@@ -191,7 +186,7 @@ class Sync_AASD_Monitor:
         for i in range(3):
             monitor_vals += read_signed_values(self.client, servo_number, 368+i*8, 8)
         monitor_vals += read_signed_values(self.client, servo_number, 368+24, 5)
-        self.parameters = parse_values(keys, monitor_vals)
+        self.parameters[servo_number] = parse_simple(keys, monitor_vals)
         return 0     
         
     def read_SigOut(self, servo_number:int)->dict:
@@ -205,14 +200,18 @@ class Sync_AASD_Monitor:
         ]
         rr = self.client.read_holding_registers(386, 1, slave=servo_number)
         str_vals = read_16bits(rr.registers[0], len(keys)) # len=14
-        self.SigOut=parse_values(keys, list(map(int, list(str_vals))))
-        return self.SigOut
+        self.SigOut[servo_number]=parse_values(keys, list(map(int, list(str_vals))))
+        return self.SigOut[servo_number]
 
 class Sync_AASD_Settings:
     """PnXXX modbus addresses from 0 to 270 for Pn000 to Pn270, read and write
     """  
     def __init__(self, client:ModbusSerialClient):
         self.client=client
+        self.descriptions=PrmsDetail().read_detail()
+        self.SigIn = {}
+        self.system_prms, self.extended_prms = {}, {}
+        self.position_prms, self.speed_prms, self.torque_prms = {}, {}, {}
 
     def read_SigIn_port(self, servo_number:int) -> dict:
         """Return dictionary of SigIn: {SigIn_name: {internal:bool, enable: bool}, }.
@@ -233,16 +232,16 @@ class Sync_AASD_Settings:
            'ZeroLock', 'EMG', 'TCW', 'TCCW', 
            'CWL', 'CCWL', 'AlarmRst', 'SON', # start register1
           ]
-        self.SigIn = {key: None for key in keyList}
+        self.SigIn[servo_number] = {key: None for key in keyList}
         # nums = self._read(servo_number, 68, 2)
         rr = self.client.read_holding_registers(68, 4, slave=servo_number)
         regs_mode_and_enable = [read_16bits(num, 15) for num in  rr.registers]
         for i in range(15): # Pn068~Pn171
-            self.SigIn[keyList[i+16]]={'internal': int(regs_mode_and_enable[0][i])}        
-            self.SigIn[keyList[i+1]]={'internal': int(regs_mode_and_enable[1][i])} # don't use [0] = "Sen"
-            self.SigIn[keyList[i+16]]={'enable': int(regs_mode_and_enable[2][i])}
-            self.SigIn[keyList[i+1]]={'enable': int(regs_mode_and_enable[3][i])} # don't use [0] = "Sen"
-        return self.SigIn
+            self.SigIn[servo_number][keyList[i+16]]={'internal': int(regs_mode_and_enable[0][i])}        
+            self.SigIn[servo_number][keyList[i+1]]={'internal': int(regs_mode_and_enable[1][i])} # don't use [0] = "Sen"
+            self.SigIn[servo_number][keyList[i+16]]={'enable': int(regs_mode_and_enable[2][i])}
+            self.SigIn[servo_number][keyList[i+1]]={'enable': int(regs_mode_and_enable[3][i])} # don't use [0] = "Sen"
+        return self.SigIn[servo_number]
         
     def read_system_prms(self, servo_number:int) -> dict:
         """Return list of 92 values from Pn000 to Pn092 except Pn086.
@@ -254,15 +253,18 @@ class Sync_AASD_Settings:
         Returns:
             dict: system parameters
         """               
-        keys = ['Pn'+str(i).zfill(3) for i in range(86)]
-        keys += ['Pn'+str(i).zfill(3) for i in range(87,93)]
+        fnames = ['Pn'+str(i).zfill(3) for i in range(86)]
+        fnames += ['Pn'+str(i).zfill(3) for i in range(87,93)]
         system_op_vals = []
         for i in range(10):
             system_op_vals += read_signed_values(self.client, servo_number, i*8, 8)
         system_op_vals += read_signed_values(self.client, servo_number, 80, 6)
         system_op_vals += read_signed_values(self.client, servo_number, 87, 6)
-        self.system_prms = parse_values(keys, system_op_vals)
-        return self.system_prms
+        self.system_prms[servo_number] = parse_values(
+            fnames, system_op_vals, 
+            self.descriptions['System parameter']
+        )
+        return self.system_prms[servo_number]
     
     def read_position_prms(self, servo_number:int) -> dict:
         """Return list of 46 values from Pn096 to Pn141.
@@ -275,8 +277,11 @@ class Sync_AASD_Settings:
         for i in range(5):
             position_op_vals += read_signed_values(self.client, servo_number, 96+i*8, 8)
         position_op_vals += read_signed_values(self.client, servo_number, 136, 6)
-        self.position_prms = parse_values(keys, position_op_vals)
-        return self.position_prms
+        self.position_prms[servo_number] = parse_values(
+            keys, position_op_vals,
+            self.descriptions['Position control parameter']
+        )
+        return self.position_prms[servo_number]
     
     def read_speed_prms(self, servo_number:int) -> dict:
         """Return list of 36 values from Pn146 to Pn183 except Pn180 and Pn181.
@@ -295,8 +300,11 @@ class Sync_AASD_Settings:
             speed_op_vals += read_signed_values(self.client, servo_number, 146+i*8, 8)
         speed_op_vals += read_signed_values(self.client, servo_number, 178, 2)
         speed_op_vals += read_signed_values(self.client, servo_number, 182, 2)
-        self.speed_prms = parse_values(keys, speed_op_vals)
-        return self.speed_prms
+        self.speed_prms[servo_number] = parse_values(
+            keys, speed_op_vals,
+            self.descriptions['Speed control parameter']
+        )
+        return self.speed_prms[servo_number]
     
     def read_torque_prms(self, servo_number:int) -> dict:
         """Return list of 25 values from Pn186 to Pn210.
@@ -313,8 +321,11 @@ class Sync_AASD_Settings:
         for i in range(3):
             torque_op_vals += read_signed_values(self.client, servo_number, 186+i*8, 8)
         torque_op_vals += read_signed_values(self.client, servo_number, 210, 1)
-        self.torque_prms = parse_values(keys, torque_op_vals)
-        return self.torque_prms
+        self.torque_prms[servo_number] = parse_values(
+            keys, torque_op_vals,
+            self.descriptions['Torque control parameter']
+        )
+        return self.torque_prms[servo_number]
     
     def read_extended_prms(self, servo_number:int) -> dict:
         """Return list of 36 values from Pn216 to Pn270 except Pn240 to Pn256 and Pn261 to Pn262.
@@ -334,18 +345,20 @@ class Sync_AASD_Settings:
             extended_op_vals += read_signed_values(self.client, servo_number, 216+i*8, 8)
         extended_op_vals += read_signed_values(self.client, servo_number, 257, 4)
         extended_op_vals += read_signed_values(self.client, servo_number, 263, 8)
-        self.extended_prms = parse_values(keys, extended_op_vals)
-        return self.extended_prms
+        self.extended_prms[servo_number] = parse_values(
+            keys, extended_op_vals,
+            self.descriptions['Extended control parameter']
+        )
+        return self.extended_prms[servo_number]
 
-    def refresh(self, servo_number:int) -> list:
+    def refresh(self, servo_number:int):
         self.read_system_prms(servo_number)
         self.read_position_prms(servo_number)
         self.read_speed_prms(servo_number)
         self.read_torque_prms(servo_number)
         self.read_extended_prms(servo_number)    
         return 0
-    
-    
+
 class Sync_AASD_15A:
     """Serial synchronous AC Servo Driver for AC Servo Motor model 80ST-M02430LB.
     Wrapper of Sync_AASD_Alarm, Sync_AASD_Monitor ans Sync_AASD_Settings.

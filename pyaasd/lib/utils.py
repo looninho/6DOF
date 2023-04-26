@@ -5,7 +5,27 @@ root_dir=os.path.dirname(os.path.dirname(this_dir))
 # sys.path.insert(1, os.path.join(root_dir, 'pyaasd/ui'))
 docs_dir=os.path.join(root_dir, 'docs')
 
-parmtxt=os.path.join(docs_dir, 'prms_detail')
+prmstxt=os.path.join(docs_dir, 'prms_detail')
+
+def get_description(pn_group:list, key:str)->dict:
+    for elm in pn_group:
+        if elm['function']==key:
+            return elm
+    return
+
+def parse_simple(keys:list, values:list)-> dict:
+    d={}    
+    for k, v in zip(keys, values):
+        d[k] = v
+    return d
+
+def parse_values(fnames:list, values:list, group:list)->dict:
+    d={}
+    for fname, v in zip(fnames, values):
+        desc = get_description(group, fname)
+        d[fname] = {k: desc[k] for k in desc.keys() - ['function']}
+        d[fname]['value'] = v
+    return d
 
 def to_children(item_list)->list:
     children=[]
@@ -25,6 +45,25 @@ def to_children(item_list)->list:
         children.append(child)
     return children
 
+def to_group_prms(group_dict:dict)->list:
+    children=[]
+    for key, item in group_dict.items():
+        default= 0 if item['default'] == 'Rated speed' else item['default']
+        child={
+            'title': key.lower() + " "*4,
+            'name': key.lower().replace(' ', '_'),
+            'type': 'float' if '.' in item['range'] else 'int', #TODO for key 'type': list or group if not continous values
+            'default': float(default) if '.' in item['range'] else int(float(default)),
+            'value': item['value'],
+            'limits': item['range'],
+            'suffix': item['unit'], 
+            'tip': item['description'],
+            'readonly': False,
+            'visible': True, # change with .setOpts(visible=True) 
+        }
+        children.append(child)
+    return children
+    
 def get_all_params(prms:dict)->list:
     all_params = []
     for key, item in prms.items():
@@ -58,14 +97,12 @@ def SigOut_gen():
     SigOut = {key: None for key in keyList}
     return SigOut
 
-
-
 class PrmsDetail:
-    def __init__(self, filepath=parmtxt) -> None:
+    def __init__(self, filepath=prmstxt) -> None:
         file1 = open(filepath, 'r')
         self.Lines = file1.readlines()
 
-    def read_detail(self)-> list:
+    def read_detail(self)-> dict:
         prms_detail={}
         for line in self.Lines[1:]:
             if line.startswith('## '):
