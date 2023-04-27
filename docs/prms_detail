@@ -194,47 +194,14 @@ Used to limit the maximum speed of motor operation. The setting value shall be l
 & Pn053;1;SigIn2 port function allocation;-31-31;2;;All
 & Pn054;1;SigIn3 port function allocation;-31-31;19;;All
 & Pn055;1;Sigln4 part function allocation;-31-31;8;;All
-& Pn220;1;SigIn5 port function allocation;-31-31;3;;All
-& Pn221;1;SigIn6 port function allocation;-31-31;4;;All
-& Pn222;1;SigIn7 port function allocation;-31-31;9;;All
-& Pn223;1;SigIn8 port function allocation;-31-31;10;;All
-& Pn224;1;SigIn9 port function allocation;-31-31;11;;All
-& Pn225;1;SigIn10 port function allocation;-31-31;0;;All
-Specific function allocation, refer to SigIn function detailed table.
--1~-31 function number is 1-31 function number,	the corresponding negative
-logic function is the same, the effective level	is opposite.
-============== ========================================================
-**Setting value**   **Sigln input level**    **Sigln corresponding function number**
-Positive    Low level   ON
-Positive    High level  OFF
-negative    Low level   OFF
-negative    High level  ON
-============== ========================================================
 & Pn056;0;SigIn1 port filtering time;1-1000;2;ms;All
 & Pn057;0;SigIn2 port filtering time;1-1000;2;ms;All
 & Pn058;0;Sig1n3 port filtering time;1-1000;2;ms;All
 & Pn059;0;Sig1n4 port filtering time;1-1000;2;ms;All
-& Pn226;0;SigIn5 port filtering time;1-1000;2;ms;All
-& Pn227;0;SigIn6 port filtering time;1-1000;2;ms;All
-& Pn228;0;SigIn7 port filtering time;1-1000;2;ms;All
-& Pn229;0;SigIn8 port filtering time;1-1000;2;ms;All
-& Pn230;0;SigIn9 port filtering time;1-1000;2;ms;All
-& Pn231;0;SigIn10 port filtering time;1-1000;2;ms;All
-Perform digital filtering on the input port Sigln.
 & Pn060;1;SigOut1 port function allocation;-14-14;2;;All
 & Pn061;1;SigOut2 port function allocation;-14-14;1;;All
 & Pn062;1;SigOut3 port function allocation;-14-14;4;;All
 & Pn063;1;SigOut4 port function allocation;-14-14;7;;All
-& Pn232;1;SigOut3 port function allocation;-14-14;9;;All
-& Pn233;1;SigOut4 port function allocation;-14-14;10;;All
-============== ========================================================
-**Setting value**   **Corresponding function number**    **SigOut output results**
-Positive    ON  Low level
-Positive    OFF High level
-negative    OFF Low level
-negative    ON  High level
-Specific function allocation, refer to SigOut function detailed table.
-============== ========================================================
 & Pn064;1;communication mode;0-2;2;;All
 ============== ========================================================
 **Setting value**
@@ -587,8 +554,7 @@ Manually adjust the offset step as follows:
 3   if the observation value is not 0, input negative observation value to this parameter, then can realize the adjustment  (pay attention to voltage unit conversion relation).
 ============= ========================================================
 Example: Dn17=1.12 V, Pn159, enter -1120 mV.
-& 
-Pn160;0;Analog speed direction;0-1;0;;S
+& Pn160;0;Analog speed direction;0-1;0;;S
 ============= ========================================================
 **Setting value**
 0   Positive voltage forward (CCW), negative voltage reversal (CW)	
@@ -764,6 +730,39 @@ When used as a multi loop absolute encoder, if the motor is always running in si
 0   Multi circle overflow alarm not detected
 1   Multi circle overflow alarm detection
 ============= ========================================================
+& Pn220;1;SigIn5 port function allocation;-31-31;3;;All
+& Pn221;1;SigIn6 port function allocation;-31-31;4;;All
+& Pn222;1;SigIn7 port function allocation;-31-31;9;;All
+& Pn223;1;SigIn8 port function allocation;-31-31;10;;All
+& Pn224;1;SigIn9 port function allocation;-31-31;11;;All
+& Pn225;1;SigIn10 port function allocation;-31-31;0;;All
+Specific function allocation, refer to SigIn function detailed table.
+-1~-31 function number is 1-31 function number,	the corresponding negative
+logic function is the same, the effective level	is opposite.
+============== ========================================================
+**Setting value**   **Sigln input level**    **Sigln corresponding function number**
+Positive    Low level   ON
+Positive    High level  OFF
+negative    Low level   OFF
+negative    High level  ON
+============== ========================================================
+& Pn226;0;SigIn5 port filtering time;1-1000;2;ms;All
+& Pn227;0;SigIn6 port filtering time;1-1000;2;ms;All
+& Pn228;0;SigIn7 port filtering time;1-1000;2;ms;All
+& Pn229;0;SigIn8 port filtering time;1-1000;2;ms;All
+& Pn230;0;SigIn9 port filtering time;1-1000;2;ms;All
+& Pn231;0;SigIn10 port filtering time;1-1000;2;ms;All
+Perform digital filtering on the input port Sigln.
+& Pn232;1;SigOut3 port function allocation;-14-14;9;;All
+& Pn233;1;SigOut4 port function allocation;-14-14;10;;All
+============== ========================================================
+**Setting value**   **Corresponding function number**    **SigOut output results**
+Positive    ON  Low level
+Positive    OFF High level
+negative    OFF Low level
+negative    ON  High level
+Specific function allocation, refer to SigOut function detailed table.
+============== ========================================================
 & Pn234;0;Maximum pulse command frequency;20-2000;550;kHz;P
 When the instruction pulse frequency exceeds the set value, the driver sends out an alarm.
 & Pn235;0;Pulse instruction digital filtering time;0-255;0;100 ms;P

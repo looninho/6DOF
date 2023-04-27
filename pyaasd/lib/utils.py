@@ -11,6 +11,7 @@ def get_description(pn_group:list, key:str)->dict:
     for elm in pn_group:
         if elm['function']==key:
             return elm
+    print(f"ERROR: Description not found for {key}")
     return
 
 def parse_simple(keys:list, values:list)-> dict:
@@ -51,7 +52,7 @@ def to_group_prms(group_dict:dict)->list:
         default= 0 if item['default'] == 'Rated speed' else item['default']
         child={
             'title': key.lower() + " "*4,
-            'name': key.lower().replace(' ', '_'),
+            'name': key.lower(),
             'type': 'float' if '.' in item['range'] else 'int', #TODO for key 'type': list or group if not continous values
             'default': float(default) if '.' in item['range'] else int(float(default)),
             'value': item['value'],

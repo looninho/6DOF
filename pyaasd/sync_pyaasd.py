@@ -28,7 +28,7 @@ from pymodbus.framer.rtu_framer import ModbusRtuFramer
 
 import numpy as np
 
-from lib.utils import PrmsDetail, parse_simple, parse_values
+from utils import PrmsDetail, parse_simple, parse_values
 
 # User parameter mode (Pn) operation
 # address 0000H..00ECH or 0..236 (dec): Pn000..Pn236 (read-write)
