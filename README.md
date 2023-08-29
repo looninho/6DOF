@@ -61,16 +61,15 @@ mycontroller.set_motor_code(motor_idx, 4)
 
 # change the SigIn Ptrigger BIT10=1 for internal control
 mycontroller.allow_internal_control(motor_idx, True)
+```
 
+### position settings
+```
 # select internal position control mode
 # You need to power cycle the driver to take effect or 
 # set it permanently with Fn001.
 mycontroller.set_control_mode(motor_idx, 2)
 
-```
-
-### position settings
-```
 # set electronic gear ratio to 3 for cell number 4 (Pn101)
 mycontroller.set_PM_electronic_gear_ratio(motor_idx, gear_ration=3, cell=4)  
 
@@ -81,7 +80,7 @@ mycontroller.set_PM_accel_decel_mode(motor_idx, 2)
 mycontroller.set_PM_command_source_selection(motor_idx, 2)
 ```
 
-## Move motor
+### Move motor with position mode
 Now we can move the motor
 ```
 # enable the motor
@@ -93,4 +92,38 @@ mycontroller.set_PM_move(motor_idx, 1, 5000)
 # disable the motor
 mycontroller.set_enable_motor(motor_idx, False)
 
+```
+
+### speed settings
+```
+# select internal speed control mode  
+# You need to power cycle the driver to take effect or  
+# set it permanently with Fn001.  
+mycontroller.set_control_mode(motor_idx, 1)
+
+# set acceleration & deceleration mode to S-curve filter:
+# note: values for Pn146 are
+#        0: No acceleration and deceleration
+#        1: S-curve accel & decel
+#        2: Linear accel & decel
+mycontroller.set_SM_accel_decel_mode(motor_idx, 1)
+
+# set time constants Ts to 10 ms, Ta to 30 ms, Td to 100 ms:
+mycontroller.set_SM_time_constants_ms(motor_idx, 10, 30, 100)
+
+# select internal speed source control
+mycontroller.set_SM_command_source_selection(motor_idx, 1)
+
+# enable the motor  
+mycontroller.set_enable_motor(motor_idx, True)
+
+# set the motor speed to -50 rpm
+# by default SP1, SP2 and SP3 are 0, 0, 0 this means
+# the internal speed command is 1.
+# if you set SP1, SP2, SP3 to 1, 1, 1 in the Pn070, 
+# this means the internal speed command is 8.
+mycontroller.set_SM_internal_speed_command_1(motor_idx, -50)
+
+# disable the motor
+mycontroller.set_enable_motor(motor_idx, False)
 ```

@@ -567,6 +567,111 @@ class Sync_AASD_15A:
         if trigger:
             self.trigger(servo_number)
 
+    def set_SM_accel_decel_mode(self, servo_number:int, function_nb:int=1):
+        """Speed command plus deceleration mode.
+        This parameter should be set to 0 in the speed control mode with an external position loop.
+
+        Args:
+            servo_number (int): servo motor number (see Pn065).
+            function_nb (int, optional): 0~2. Defaults to 1. 
+                0: No acceleration and deceleration
+                1: S-curve accel & decel
+                2: Linear accel & decel
+        """        
+        write_noconvert(self.client, servo_number, 146, function_nb)
+
+    def set_SM_time_constants_ms(self, servo_number:int, Ts:int=10, Ta:int=30, Td:int=100):
+        """S-curve time constants
+
+        Args:
+            servo_number (int): servo motor number (see Pn065).
+            Ts (int, optional): Ts time constant. Defaults to 10.
+            Ta (int, optional): Ta time constant. Defaults to 30.
+            Td (int, optional): Td time constant. Defaults to 100.
+        """   
+        writes(self.client, servo_number, 146, [Ts, Ta, Td])
+
+    def set_SM_command_source_selection(self, servo_number:int, source:int=1):
+        """Speed mode Pn168. Select source for speed command.
+
+        Args:
+            servo_number (int): ervo motor number (see Pn065).
+            source (int, optional): 0~2. Defaults to 1 (internal). See Pn070 for SP1, SP2, SP3 status.
+        """        
+        write_noconvert(self.client, servo_number, 168, source)
+
+    def set_SM_internal_speed_command_1(self, servo_number:int, rpm:int):
+        """Internal speed command 1 (Pn169) if SP1, SP2, SP3 are 0, 0, 0 (see Pn070).
+
+        Args:
+            servo_number (int): servo motor number (see Pn065).
+            rpm (int): -5000~5000 rpm.
+        """        
+        write(self.client, servo_number, 169, rpm)
+
+    def set_SM_internal_speed_command_2(self, servo_number:int, rpm:int):
+        """Internal speed command 2 (Pn170) if SP1, SP2, SP3 are 0, 0, 1 (see Pn070).
+
+        Args:
+            servo_number (int): servo motor number (see Pn065).
+            rpm (int): -5000~5000 rpm.
+        """        
+        write(self.client, servo_number, 170, rpm)
+
+    def set_SM_internal_speed_command_3(self, servo_number:int, rpm:int):
+        """Internal speed command 3 (Pn171) if SP1, SP2, SP3 are 0, 1, 0 (see Pn070).
+
+        Args:
+            servo_number (int): servo motor number (see Pn065).
+            rpm (int): -5000~5000 rpm.
+        """        
+        write(self.client, servo_number, 171, rpm)
+
+    def set_SM_internal_speed_command_4(self, servo_number:int, rpm:int):
+        """Internal speed command 4 (Pn172) if SP1, SP2, SP3 are 0, 1, 1 (see Pn070).
+
+        Args:
+            servo_number (int): servo motor number (see Pn065).
+            rpm (int): -5000~5000 rpm.
+        """        
+        write(self.client, servo_number, 172, rpm)
+
+    def set_SM_internal_speed_command_5(self, servo_number:int, rpm:int):
+        """Internal speed command 5 (Pn173) if SP1, SP2, SP3 are 1, 0, 0 (see Pn070).
+
+        Args:
+            servo_number (int): servo motor number (see Pn065).
+            rpm (int): -5000~5000 rpm.
+        """        
+        write(self.client, servo_number, 173, rpm)
+
+    def set_SM_internal_speed_command_6(self, servo_number:int, rpm:int):
+        """Internal speed command 6 (Pn174) if SP1, SP2, SP3 are 1, 0, 1 (see Pn070).
+
+        Args:
+            servo_number (int): servo motor number (see Pn065).
+            rpm (int): -5000~5000 rpm.
+        """        
+        write(self.client, servo_number, 174, rpm)
+
+    def set_SM_internal_speed_command_7(self, servo_number:int, rpm:int):
+        """Internal speed command 7 (Pn175) if SP1, SP2, SP3 are 1, 1, 0 (see Pn070).
+
+        Args:
+            servo_number (int): servo motor number (see Pn065).
+            rpm (int): -5000~5000 rpm.
+        """        
+        write(self.client, servo_number, 175, rpm)
+
+    def set_SM_internal_speed_command_8(self, servo_number:int, rpm:int):
+        """Internal speed command 8 (Pn176) if SP1, SP2, SP3 are 1, 1, 1 (see Pn070).
+
+        Args:
+            servo_number (int): servo motor number (see Pn065).
+            rpm (int): -5000~5000 rpm.
+        """        
+        write(self.client, servo_number, 176, rpm)
+
 
         
     
